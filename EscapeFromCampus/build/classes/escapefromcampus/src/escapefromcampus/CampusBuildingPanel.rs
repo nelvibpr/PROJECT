@@ -1,0 +1,5 @@
+escapefromcampus.CampusBuildingPanel$RoomObject
+escapefromcampus.CampusBuildingPanel$InteriorKey
+escapefromcampus.CampusBuildingPanel$RoomSpot
+escapefromcampus.CampusBuildingPanel$1
+escapefromcampus.CampusBuildingPanel

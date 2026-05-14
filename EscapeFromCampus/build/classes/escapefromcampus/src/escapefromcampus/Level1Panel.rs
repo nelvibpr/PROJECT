@@ -1,0 +1,4 @@
+escapefromcampus.Level1Panel$Collectible
+escapefromcampus.Level1Panel
+escapefromcampus.Level1Panel$WorldArea
+escapefromcampus.Level1Panel$1
