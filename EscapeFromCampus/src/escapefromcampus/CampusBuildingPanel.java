@@ -528,7 +528,7 @@ public class CampusBuildingPanel extends JPanel {
             return;
         }
 
-        // Dibungkus dengan invokeLater agar aman saat memunculkan kuis pilihan ganda Terminal
+        // Dibungkus dengan invokeLater agar aman saat memunculkan kuis pilihan ganda
         javax.swing.SwingUtilities.invokeLater(() -> {
             if ("Pintu Keluar".equals(nearbySpot.name)) {
                 frame.showPanel("Level1");
@@ -537,7 +537,7 @@ public class CampusBuildingPanel extends JPanel {
                 missionText = clueText + " Kunci asli disembunyikan di " + storageSpotName + ".";
             } else if (infoSpotName.equals(nearbySpot.name)) {
                 missionText = infoText + " Kunci palsu berbentuk wajik merah tersebar di antara meja dan rak.";
-            } else if (nearbySpot.name.startsWith("Terminal ")) { 
+            } else if (nearbySpot.name.startsWith("Akses ")) { 
                 // Menggunakan "Terminal " sesuai tema IT yang kamu inginkan sebelumnya
                 openRoomPuzzle(Integer.parseInt(nearbySpot.name.substring(6)) - 1);
             } else if (storageSpotName.equals(nearbySpot.name)) {
@@ -546,7 +546,7 @@ public class CampusBuildingPanel extends JPanel {
                 } else if (!clueFound) {
                     missionText = storageSpotName + " terkunci. Cari petunjuk utama di " + clueSpotName + ".";
                 } else {
-                    missionText = storageSpotName + " terkunci. Selesaikan 5 puzzle OOP dulu. Progres: "
+                    missionText = storageSpotName + " terkunci. Selesaikan 5 akses OOP dulu. Progres: "
                             + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
                 }
             }
@@ -566,7 +566,7 @@ public class CampusBuildingPanel extends JPanel {
 
         PuzzleTask puzzleTask = puzzleTasks.get(index);
         if (puzzleTask.solved) {
-            missionText = "Puzzle " + (index + 1) + " sudah selesai. Progres: "
+            missionText = "Akses " + (index + 1) + " sudah selesai. Progres: "
                     + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
             return;
         }
@@ -574,7 +574,7 @@ public class CampusBuildingPanel extends JPanel {
         int answer = JOptionPane.showOptionDialog(
                 this,
                 puzzleTask.question,
-                "Puzzle OOP " + (index + 1) + " - " + roomName,
+                "Akses OOP " + (index + 1) + " - " + roomName,
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
                 null,
@@ -585,14 +585,14 @@ public class CampusBuildingPanel extends JPanel {
         if (answer == puzzleTask.correctIndex) {
             puzzleTask.solved = true;
             puzzlesSolved++;
-            missionText = "Puzzle " + (index + 1) + " benar. Progres: "
+            missionText = "Akses " + (index + 1) + " benar. Progres: "
                     + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
             if (puzzlesSolved >= PUZZLE_TARGET) {
-                missionText += " Semua puzzle selesai, sekarang buka " + storageSpotName + ".";
+                missionText += " Semua akses selesai, sekarang buka " + storageSpotName + ".";
             }
         } else if (answer >= 0) {
             GameManager.nyawa--;
-            missionText = "Puzzle " + (index + 1) + " salah. Nyawa tersisa: " + GameManager.nyawa
+            missionText = "Akses " + (index + 1) + " salah. Nyawa tersisa: " + GameManager.nyawa
                     + ". Coba baca petunjuk lagi.";
             checkGameOver();
         }
@@ -606,8 +606,8 @@ public class CampusBuildingPanel extends JPanel {
 
         realKeyCollected = true;
         GameManager.kunci++;
-        missionText = "Semua puzzle selesai. Kamu menemukan " + realKeyName + " di " + storageSpotName + ".";
-        JOptionPane.showMessageDialog(this, realKeyName + " didapat setelah menyelesaikan 5 puzzle OOP!");
+        missionText = "Semua akses selesai. Kamu menemukan " + realKeyName + " di " + storageSpotName + ".";
+        JOptionPane.showMessageDialog(this, realKeyName + " didapat setelah menyelesaikan 5 akses OOP!");
     }
 
     private void checkGameOver() {
