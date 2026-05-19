@@ -48,7 +48,7 @@ public class Level1Panel extends JPanel {
         this.obstacles = new ArrayList<>();
         this.places = new ArrayList<>();
         this.collectibles = new ArrayList<>();
-        this.missionText = "Hint: kunci asli tersembunyi di laci/loker. Baca petunjuk, lalu jawab kuis OOP Java.";
+        this.missionText = "Hint: tiap gedung punya 5 puzzle OOP dan penjaga patroli. Hindari penjaga, baca petunjuk, lalu ambil kunci asli.";
 
         setBackground(new Color(105, 157, 95));
         setFocusable(true);
@@ -107,7 +107,10 @@ public class Level1Panel extends JPanel {
         obstacles.add(new WorldArea("Lab Komputer", 1250, 220, 330, 190, new Color(69, 105, 126)));
         obstacles.add(new WorldArea("Kelas Algoritma", 340, 560, 310, 190, new Color(173, 129, 67)));
         obstacles.add(new WorldArea("Kantin", 940, 620, 280, 180, new Color(78, 129, 89)));
-        obstacles.add(new WorldArea("Kolam Kampus", 1320, 760, 280, 190, new Color(59, 133, 160)));
+        
+        // --- DIUBAH: KOLAM KAMPUS MENJADI BILLBOARD DEVELOPER (KOORDINAT DAN UKURAN TETAP SAMA) ---
+        obstacles.add(new WorldArea("Billboard Developer", 1320, 760, 280, 190, new Color(40, 40, 40)));
+        
         obstacles.add(new WorldArea("Asrama", 310, 900, 280, 180, new Color(119, 82, 123)));
 
         places.add(new WorldArea("Gerbang Utama", 70, 1120, 130, 95, new Color(80, 80, 80)));
@@ -118,6 +121,9 @@ public class Level1Panel extends JPanel {
         places.add(new WorldArea("Lab Komputer", 1340, 410, 170, 75, new Color(126, 176, 196)));
         places.add(new WorldArea("Kantin", 1000, 800, 160, 75, new Color(129, 184, 125)));
         places.add(new WorldArea("Asrama", 380, 1080, 150, 75, new Color(175, 135, 178)));
+        
+        // --- DITAMBAHKAN: ZONA INTERAKSI UNTUK BILLBOARD ---
+        places.add(new WorldArea("Billboard Developer", 1310, 750, 300, 220, new Color(200, 200, 200)));
 
         collectibles.add(new Collectible("Kunci Mengilap", 890, 450, true));
         collectibles.add(new Collectible("Kunci Tua", 1120, 890, true));
@@ -129,7 +135,7 @@ public class Level1Panel extends JPanel {
         player.setLocation(150, 1080);
         stopMovement();
         nearbyPlace = null;
-        missionText = "Hint: kunci asli tersembunyi di laci/loker. Baca petunjuk, lalu jawab kuis OOP Java.";
+        missionText = "Hint: tiap gedung punya 5 puzzle OOP dan penjaga patroli. Hindari penjaga, baca petunjuk, lalu ambil kunci asli.";
 
         for (Collectible collectible : collectibles) {
             collectible.collected = false;
@@ -292,29 +298,32 @@ public class Level1Panel extends JPanel {
                 interactGate();
                 break;
             case "Papan Info":
-                missionText = "Hint lokasi: kunci asli ada di laci/loker dalam gedung dan butuh kuis OOP. Kunci halaman dekat perpustakaan, kantin, kolam, dan bangku itu palsu.";
+                missionText = "Hint lokasi: masuk gedung, hindari penjaga merah, selesaikan 5 puzzle OOP, lalu buka laci/loker kunci asli. Kunci halaman itu palsu.";
+                break;
+            case "Billboard Developer": // --- DITAMBAHKAN: TEKS INTERAKSI BILLBOARD ---
+                missionText = "Papan Pengumuman Khusus: Game Escape from Campus ini dikembangkan oleh 5 Mahasiswa hebat. Terima kasih sudah bermain!";
                 break;
             case "Gedung Rektorat":
-                missionText = "Rektorat: cari Lemari Arsip, lalu buka Laci Arsip dengan kuis OOP.";
+                missionText = "Rektorat: cari Lemari Arsip, selesaikan 5 puzzle OOP, lalu buka Laci Arsip.";
                 frame.showPanel("Rectorate");
                 break;
             case "Kelas Algoritma":
                 interactClassroom();
                 break;
             case "Perpustakaan":
-                missionText = "Perpustakaan: cari Meja Referensi, lalu buka Laci Meja Referensi dengan kuis OOP.";
+                missionText = "Perpustakaan: cari Meja Referensi, selesaikan 5 puzzle OOP, lalu buka Laci Meja Referensi.";
                 frame.showPanel("Library");
                 break;
             case "Lab Komputer":
-                missionText = "Lab: baca Terminal Admin, lalu buka Laci Meja Server dengan kuis OOP.";
+                missionText = "Lab: baca Terminal Admin, selesaikan 5 puzzle OOP, lalu buka Laci Meja Server.";
                 frame.showPanel("Lab");
                 break;
             case "Kantin":
-                missionText = "Kantin: tanya Kasir, lalu buka Laci Kasir dengan kuis OOP.";
+                missionText = "Kantin: tanya Kasir, selesaikan 5 puzzle OOP, lalu buka Laci Kasir.";
                 frame.showPanel("Canteen");
                 break;
             case "Asrama":
-                missionText = "Asrama: baca Papan Pengumuman, lalu buka Loker Penjaga dengan kuis OOP.";
+                missionText = "Asrama: baca Papan Pengumuman, selesaikan 5 puzzle OOP, lalu buka Loker Penjaga.";
                 frame.showPanel("Dormitory");
                 break;
             default:
@@ -424,7 +433,12 @@ public class Level1Panel extends JPanel {
         g.translate(-cameraX, -cameraY);
 
         for (WorldArea obstacle : obstacles) {
-            drawBuilding(g, obstacle);
+            // --- DIUBAH: Pengecekan apakah itu bangunan biasa atau Billboard ---
+            if ("Billboard Developer".equals(obstacle.name)) {
+                drawBillboard(g, obstacle);
+            } else {
+                drawBuilding(g, obstacle);
+            }
         }
 
         for (WorldArea place : places) {
@@ -457,6 +471,77 @@ public class Level1Panel extends JPanel {
 
         drawCenteredText(g, area.name, b.x, b.y + 12, b.width, new Color(255, 255, 255), Font.BOLD, 16);
     }
+    
+    // --- DITAMBAHKAN: METHOD BARU UNTUK MENGGAMBAR BILLBOARD DEVELOPER ---
+    private void drawBillboard(Graphics2D g, WorldArea area) {
+        Rectangle b = area.bounds;
+
+        // Bayangan Billboard (menyesuaikan gaya bangunan lain)
+        g.setColor(new Color(0, 0, 0, 45));
+        g.fillRoundRect(b.x + 10, b.y + 12, b.width, b.height, 10, 10);
+
+        // Tiang Penyangga
+        g.setColor(new Color(70, 70, 70));
+        g.fillRect(b.x + 40, b.y + 130, 20, 60);
+        g.fillRect(b.x + b.width - 60, b.y + 130, 20, 60);
+
+        // Bingkai Papan Billboard
+        g.setColor(new Color(40, 40, 40));
+        g.fillRoundRect(b.x, b.y, b.width, 140, 10, 10);
+
+        // Latar Putih Papan
+        g.setColor(new Color(245, 245, 245));
+        g.fillRoundRect(b.x + 10, b.y + 10, b.width - 20, 120, 5, 5);
+
+        // Header Teks
+        drawCenteredText(g, "TIM DEVELOPER PTI", b.x, b.y + 15, b.width, new Color(50, 50, 50), Font.BOLD, 16);
+
+        // Placeholder untuk 5 Foto & Nama
+        String[] devNames = {"Nelvi", "Dev 2", "Dev 3", "Dev 4", "Dev 5"}; // Nelvi ditaruh sebagai Dev 1
+        int portraitSize = 38;
+        int spacing = 50; 
+        int startX = b.x + 20;
+        int startY = b.y + 45;
+
+        for (int i = 0; i < 5; i++) {
+            int px = startX + (i * spacing);
+            
+            // Frame Kotak Foto
+            g.setColor(new Color(210, 210, 210));
+            g.fillRect(px, startY, portraitSize, portraitSize + 15);
+            g.setColor(new Color(150, 150, 150));
+            g.setStroke(new BasicStroke(2));
+            g.drawRect(px, startY, portraitSize, portraitSize + 15);
+            
+            // Ilustrasi Baju
+            g.setColor(new Color(80 + (i * 30) % 150, 120, 180));
+            g.fillRect(px + 6, startY + 22, portraitSize - 12, 18);
+            
+            // Ilustrasi Wajah
+            g.setColor(new Color(255, 220, 180));
+            g.fillOval(px + 9, startY + 5, 20, 20);
+
+            // Ilustrasi Rambut
+            g.setColor(new Color(50, 30, 20));
+            if (i == 0 || i % 2 != 0) {
+                // Rambut Panjang (Untuk Nelvi & karakter genap lainnya)
+                g.fillOval(px + 7, startY + 3, 24, 18); 
+                g.setColor(new Color(255, 220, 180));
+                g.fillOval(px + 9, startY + 11, 20, 14); 
+            } else {
+                // Rambut Pendek
+                g.fillArc(px + 7, startY + 3, 24, 15, 0, 180); 
+            }
+            
+            // Teks Nama di bawah foto
+            g.setFont(new Font("Arial", Font.BOLD, 10));
+            g.setColor(Color.BLACK);
+            FontMetrics fm = g.getFontMetrics();
+            int textWidth = fm.stringWidth(devNames[i]);
+            g.drawString(devNames[i], px + (portraitSize - textWidth) / 2, startY + 65);
+        }
+    }
+    // ----------------------------------------------------------------------
 
     private void drawInteractionZone(Graphics2D g, WorldArea place) {
         Rectangle b = place.bounds;

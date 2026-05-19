@@ -17,7 +17,7 @@ public class MainFrame extends JFrame {
 
     public MainFrame() {
         setTitle("Escape from Campus");
-        setSize(800, 600);
+        setSize(900, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -40,6 +40,11 @@ public class MainFrame extends JFrame {
         mainPanel.add(canteenPanel, "Canteen");
         mainPanel.add(rectoratePanel, "Rectorate");
         mainPanel.add(dormitoryPanel, "Dormitory");
+        mainPanel.add(new CharacterSelectPanel(this), "CharacterSelect");
+        
+        // --- BARIS INI YANG SEBELUMNYA KURANG ---
+        mainPanel.add(new StoryPanel(this), "Story");
+        // ----------------------------------------
 
         add(mainPanel);
     }
@@ -53,7 +58,9 @@ public class MainFrame extends JFrame {
         canteenPanel.restartRoom();
         rectoratePanel.restartRoom();
         dormitoryPanel.restartRoom();
-        showPanel("Level1");
+        
+        // Ubah startNewGame agar langsung ke panel Classroom setelah Story selesai
+        showPanel("Classroom"); 
     }
 
     public void showPanel(String panelName) {

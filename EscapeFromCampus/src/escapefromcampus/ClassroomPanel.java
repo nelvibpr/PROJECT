@@ -73,7 +73,10 @@ public class ClassroomPanel extends JPanel {
             if (!gameLoop.isRunning()) {
                 gameLoop.start();
             }
-            requestFocusInWindow();
+            javax.swing.SwingUtilities.invokeLater(() ->{
+                requestFocus();
+                requestFocusInWindow();
+            });
         } else {
             stopMovement();
             gameLoop.stop();
@@ -257,29 +260,32 @@ public class ClassroomPanel extends JPanel {
             return;
         }
 
-        switch (nearbySpot.name) {
-            case "Pintu Keluar":
-                frame.showPanel("Level1");
-                break;
-            case "Papan Tulis":
-                interactBoard();
-                break;
-            case "Laci Meja Dosen":
-                interactTeacherDrawer();
-                break;
-            case "Dosen":
-                interactTeacher();
-                break;
-            case "Rak Buku":
-                missionText = "Rak buku: kunci palsu di lantai biasanya berbentuk wajik dengan tanda silang merah.";
-                break;
-            case "Tas Misterius":
-                interactBag();
-                break;
-            default:
-                missionText = "Objek ini belum bisa dipakai.";
-                break;
-        }
+        // Dibungkus agar pembuatan dialog JOptionPane tidak bertabrakan dengan Timer game loop
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            switch (nearbySpot.name) {
+                case "Pintu Keluar":
+                    frame.showPanel("Level1");
+                    break;
+                case "Papan Tulis":
+                    interactBoard();
+                    break;
+                case "Laci Meja Dosen":
+                    interactTeacherDrawer();
+                    break;
+                case "Dosen":
+                    interactTeacher();
+                    break;
+                case "Rak Buku":
+                    missionText = "Rak buku: kunci palsu di lantai biasanya berbentuk wajik dengan tanda silang merah.";
+                    break;
+                case "Tas Misterius":
+                    interactBag();
+                    break;
+                default:
+                    missionText = "Objek ini belum bisa dipakai.";
+                    break;
+            }
+        });
     }
 
     private void interactBoard() {

@@ -28,7 +28,7 @@ public class MenuPanel extends JPanel {
         JButton startButton = new JButton("Mulai Game");
         startButton.setFont(new Font("Arial", Font.PLAIN, 20));
         startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        startButton.addActionListener(e -> frame.startNewGame());
+        startButton.addActionListener(e -> frame.showPanel("CharacterSelect"));
 
         contentBox.add(titleLabel);
         contentBox.add(Box.createRigidArea(new Dimension(0, 30)));
