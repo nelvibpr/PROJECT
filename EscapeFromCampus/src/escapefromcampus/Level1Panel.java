@@ -102,10 +102,10 @@ public class Level1Panel extends JPanel {
         places.clear();
         collectibles.clear();
 
-        obstacles.add(new WorldArea("Gedung Rektorat", 250, 170, 300, 180, new Color(142, 77, 57)));
-        obstacles.add(new WorldArea("Perpustakaan", 760, 150, 340, 210, new Color(99, 101, 137)));
+        obstacles.add(new WorldArea("Gedung Rektorat", 250, 240, 320, 180, new Color(142, 77, 57)));
+        obstacles.add(new WorldArea("Perpustakaan", 570, 140, 340, 210, new Color(99, 101, 137)));
         obstacles.add(new WorldArea("Lab Komputer", 1250, 220, 330, 190, new Color(69, 105, 126)));
-        obstacles.add(new WorldArea("Kelas Algoritma", 340, 560, 310, 190, new Color(173, 129, 67)));
+        obstacles.add(new WorldArea("Kelas Algoritma", 290, 560, 310, 190, new Color(173, 129, 67)));
         obstacles.add(new WorldArea("Kantin", 940, 620, 280, 180, new Color(78, 129, 89)));
         
         // --- DIUBAH: KOLAM KAMPUS MENJADI BILLBOARD DEVELOPER (KOORDINAT DAN UKURAN TETAP SAMA) ---
@@ -115,9 +115,9 @@ public class Level1Panel extends JPanel {
 
         places.add(new WorldArea("Gerbang Utama", 70, 1120, 130, 95, new Color(80, 80, 80)));
         places.add(new WorldArea("Papan Info", 220, 1120, 135, 75, new Color(226, 204, 122)));
-        places.add(new WorldArea("Gedung Rektorat", 335, 350, 140, 75, new Color(196, 130, 100)));
-        places.add(new WorldArea("Kelas Algoritma", 395, 750, 205, 80, new Color(214, 184, 109)));
-        places.add(new WorldArea("Perpustakaan", 850, 360, 170, 75, new Color(153, 159, 204)));
+        places.add(new WorldArea("Gedung Rektorat", 350, 420, 120, 50, new Color(196, 130, 100)));
+        places.add(new WorldArea("Kelas Algoritma", 350, 750, 195, 80, new Color(214, 184, 109)));
+        places.add(new WorldArea("Perpustakaan", 590, 155, 140, 65, new Color(153, 159, 204)));
         places.add(new WorldArea("Lab Komputer", 1340, 410, 170, 75, new Color(126, 176, 196)));
         places.add(new WorldArea("Kantin", 1000, 800, 160, 75, new Color(129, 184, 125)));
         places.add(new WorldArea("Asrama", 380, 1080, 150, 75, new Color(175, 135, 178)));
