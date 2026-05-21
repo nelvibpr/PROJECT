@@ -1,35 +1,21 @@
 package escapefromcampus;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
@@ -38,7 +24,7 @@ public class CampusBuildingPanel extends JPanel {
     private static final int ROOM_HEIGHT = 740;
     private static final int PLAYER_SIZE = 32;
     private static final int PLAYER_SPEED = 4;
-    private static final int PUZZLE_TARGET = 3; 
+    private static final int PUZZLE_TARGET = 5;
 
     private final MainFrame frame;
     private final Timer gameLoop;
@@ -47,10 +33,7 @@ public class CampusBuildingPanel extends JPanel {
     private final List<RoomSpot> spots;
     private final List<InteriorKey> keys;
     private final List<PatrolEnemy> enemies;
-    
     private final List<PuzzleTask> puzzleTasks;
-    private final Map<String, PuzzleTask> activePuzzles; 
-
     private final String roomName;
     private final String clueSpotName;
     private final String clueText;
@@ -58,7 +41,6 @@ public class CampusBuildingPanel extends JPanel {
     private final String infoText;
     private final String storageSpotName;
     private final String realKeyName;
-    
     private final Color floorColor;
     private final Color wallColor;
     private final Color furnitureColor;
@@ -75,13 +57,8 @@ public class CampusBuildingPanel extends JPanel {
     private int enemyHitCooldown;
     private int cameraX;
     private int cameraY;
+    private String missionText;
     private RoomSpot nearbySpot;
-
-    // --- VARIABEL ANIMASI SPRITE ---
-    private Image up1, up2, down1, down2, left1, left2, right1, right2;
-    private String direction = "down"; 
-    private int spriteCounter = 0;     
-    private int spriteNum = 1;
 
     public static CampusBuildingPanel createLibrary(MainFrame frame) {
         return new CampusBuildingPanel(
@@ -94,26 +71,22 @@ public class CampusBuildingPanel extends JPanel {
                 "Laci Meja Referensi",
                 "Kunci Arsip Perpustakaan",
                 new PuzzleTask[]{
-                    new PuzzleTask(
-                        "Konteks: Anda menemukan sebuah buku tebal yang diselipkan sebuah microchip tipis di antara dua halaman. Untuk mengambilnya tanpa memicu alarm, Anda harus menekan nomor kedua halaman tersebut pada panel.",
-                        "Buku tersebut terbuka lebar, dan bagian tengahnya sengaja dicoret. Petunjuk dari pustakawan: 'Jumlah dari nomor halaman kiri dan halaman kanan yang saling berhadapan ini adalah 333.'\nHalaman berapakah yang ada di sisi kiri?",
-                        new String[]{"165", "166", "167", "333"}, 1,
-                        "Nomor halaman yang berhadapan selalu berurutan (x dan x+1). Maka x + (x + 1) = 333 -> 2x = 332 -> x = 166. Halaman sebelah kiri selalu bernomor genap, yaitu 166."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Pintu rahasia hanya akan terbuka jika rak-rak di Lorong Barat berada di urutan klasifikasi yang benar dari rak 1 hingga 4. Anda harus menempatkan rak Komik ke posisi yang tepat.",
-                        "Rak Komik harus tepat di antara Novel dan Sejarah.\nRak Sains terpaku mati di posisi nomor 4.\nRak Sejarah dilarang di ujung paling kiri (posisi 1).\nDi posisi nomor berapakah Anda menempatkan rak Komik?",
-                        new String[]{"Posisi 1", "Posisi 2", "Posisi 3", "Posisi 4"}, 1,
-                        "Sains di posisi 4. Tersisa 1, 2, 3. Komik di tengah Novel dan Sejarah (mengisi 1, 2, 3). Karena Sejarah tidak boleh di nomor 1, maka Sejarah di 3, Novel di 1. Komik berada di tengahnya, yaitu Posisi 2."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Anda tiba di gerbang turnstile keluar. Sistem tidak meminta kartu, melainkan jumlah tagihan denda terakhir (tanpa angka nol terakhir).",
-                        "Denda adalah Rp 500/hari. Buku dipinjam tgl 1 Maret (maksimal 1 minggu / kembali tgl 8 Maret). Tapi dikembalikan tgl 14 Maret.\nBerapakah denda totalnya?",
-                        new String[]{"2500", "3000", "3500", "4000"}, 1,
-                        "Batas waktu adalah 8 Maret. Dikembalikan 14 Maret. Keterlambatan = 14 - 8 = 6 hari. Denda = 6 x Rp 500 = Rp 3000."
-                    )
+                    new PuzzleTask("Rak 7: class paling tepat diartikan sebagai apa?",
+                            new String[]{"Blueprint/rancangan objek", "Objek yang sudah berjalan", "Perintah mencetak teks"}, 0),
+                    new PuzzleTask("Susun konsep: objek dibuat dari...",
+                            new String[]{"Class", "Package", "Komentar"}, 0),
+                    new PuzzleTask("Encapsulation berarti...",
+                            new String[]{"Membungkus data dan aksesnya", "Menghapus semua method", "Membuat program tanpa class"}, 0),
+                    new PuzzleTask("Method dalam class dipakai untuk...",
+                            new String[]{"Menjalankan perilaku objek", "Menyimpan nama package saja", "Mengganti file Java"}, 0),
+                    new PuzzleTask("Keyword untuk membuat objek baru adalah...",
+                            new String[]{"new", "static", "void"}, 0)
                 },
-                0, new Color(174, 165, 140), new Color(77, 69, 89), new Color(96, 66, 50), new Color(126, 132, 190)
+                0,
+                new Color(174, 165, 140),
+                new Color(77, 69, 89),
+                new Color(96, 66, 50),
+                new Color(126, 132, 190)
         );
     }
 
@@ -128,26 +101,22 @@ public class CampusBuildingPanel extends JPanel {
                 "Laci Meja Server",
                 "Kunci Server Lab",
                 new PuzzleTask[]{
-                    new PuzzleTask(
-                        "Konteks: Sistem komputer utama sedang diretas malware. Anda harus menekan tombol abort di menit yang tepat saat file virus memenuhi 'setengah' dari kapasitas server.",
-                        "Virus menggandakan dirinya (2 kali lipat) setiap 1 menit. Jika server akan penuh (100%) dalam waktu 10 menit, pada menit ke berapakah server tersebut terisi tepat setengah (50%)?",
-                        new String[]{"Menit ke-5", "Menit ke-9", "Menit ke-10", "Menit ke-20"}, 1,
-                        "Karena virus berlipat ganda setiap menitnya, maka tepat satu menit sebelum penuh (menit ke-9), kapasitasnya pasti baru setengah."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Pintu lab hanya terbuka jika lampu hijau menyala. Ada 3 sakelar (A, B, C). Pintu terbuka jika hanya tepat DUA sakelar ON.",
-                        "Buku manual:\n1. Butuh 2 sakelar ON.\n2. Jika A = ON, maka B otomatis OFF.\nSaat ini, sakelar C rusak dan permanen tertahan di OFF. Apa yang harus Anda lakukan pada sakelar A dan B?",
-                        new String[]{"A ON, B ON", "A OFF, B OFF", "A OFF, B ON", "Sistem Gagal"}, 3,
-                        "C sudah OFF. Agar 2 sakelar ON, maka A dan B harus sama-sama ON. Namun aturan 2 melarang A dan B ON bersamaan. Jadi mustahil pintu bisa terbuka lewat sakelar (Sistem Gagal)."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Kabel jaringan terpotong dan ditandai angka biner. Untuk menyambungnya, tebak urutan kabel kelima.",
-                        "Kabel 1: 0010\nKabel 2: 0100\nKabel 3: 0110\nKabel 4: 1000\nKabel 5: ????",
-                        new String[]{"0111", "1001", "1010", "1100"}, 2,
-                        "Pola biner ini mewakili bilangan genap yang terus bertambah dua: 2, 4, 6, 8. Angka genap selanjutnya adalah 10, yang ditulis dalam biner sebagai 1010."
-                    )
+                    new PuzzleTask("Terminal 1: keyword class anak dari class induk adalah...",
+                            new String[]{"extends", "return", "new"}, 0),
+                    new PuzzleTask("Terminal 2: class yang menjadi induk disebut...",
+                            new String[]{"Superclass", "Scanner", "Constructor"}, 0),
+                    new PuzzleTask("Terminal 3: override berarti...",
+                            new String[]{"Menulis ulang method warisan", "Mengunci semua atribut", "Menghapus package"}, 0),
+                    new PuzzleTask("Terminal 4: polymorphism memungkinkan objek...",
+                            new String[]{"Memiliki banyak bentuk perilaku", "Selalu private", "Tidak punya method"}, 0),
+                    new PuzzleTask("Terminal 5: interface biasanya berisi...",
+                            new String[]{"Kontrak method", "Data acak", "Gambar UI"}, 0)
                 },
-                1, new Color(143, 162, 169), new Color(55, 76, 87), new Color(68, 84, 96), new Color(89, 164, 197)
+                1,
+                new Color(143, 162, 169),
+                new Color(55, 76, 87),
+                new Color(68, 84, 96),
+                new Color(89, 164, 197)
         );
     }
 
@@ -162,26 +131,22 @@ public class CampusBuildingPanel extends JPanel {
                 "Laci Kasir",
                 "Kunci Dapur Kantin",
                 new PuzzleTask[]{
-                    new PuzzleTask(
-                        "Konteks: Ibu Kantin mau memberi token jika Anda bisa menakar tepat 400 ml air sirop ke dalam mangkuk besar. Namun ia hanya punya dua gelas takar berukuran 500 ml dan 300 ml.",
-                        "Berapa kali Anda harus mengisi penuh gelas 500 ml dari keran untuk bisa mendapatkan tepat 400 ml air di akhir proses?",
-                        new String[]{"1 kali", "2 kali", "3 kali", "4 kali"}, 1,
-                        "Isi gelas 500 (Isi 1). Tuang ke gelas 300. Sisa di gelas 500 = 200 ml. Buang isi 300, tuang 200 ml tadi ke 300. Isi penuh lagi gelas 500 (Isi 2). Tuang ke 300 sampai penuh (butuh 100 ml). Sisa di gelas besar tepat 400 ml. Butuh 2 kali pengisian penuh."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Anda harus menyusup ke ruang penyimpanan, kulkas digembok dengan sandi harga.",
-                        "Kemarin: 2 Nasi Goreng + 1 Es Teh = Rp 25.000.\nHari ini: 1 Nasi Goreng + 2 Es Teh = Rp 20.000.\nBerapakah harga 1 porsi Nasi Goreng? (Dalam ribuan)",
-                        new String[]{"5", "10", "15", "20"}, 1,
-                        "Total keduanya: 3 Nasi + 3 Es = Rp 45.000 -> 1 Nasi + 1 Es = Rp 15.000. Dari pesanan hari ini: (1 Nasi + 1 Es) + 1 Es = 20.000. Berarti 1 Es Teh = Rp 5.000. Maka 1 Nasi Goreng = Rp 10.000."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Salah satu dari 4 orang di meja bundar (Rina, Toni, Siska, Dimas) membawa sekering. Target adalah yang makan Bakso.",
-                        "Rina berhadapan dengan orang yg makan Bakso.\nToni duduk di kanan Rina.\nSiska makan Soto & tidak berhadapan dengan Toni.\nSiapa yang membawa sekering tersebut?",
-                        new String[]{"Rina", "Toni", "Siska", "Dimas"}, 3,
-                        "Siska tidak di depan Toni, Rina di depan si Target, berarti Siska harus di depan Rina. Tapi Siska makan Soto, bukan Bakso. Berarti Siska duduk di kiri Rina. Tersisa posisi di depan Rina untuk Dimas. Dimas-lah yang makan bakso."
-                    )
+                    new PuzzleTask("Nota 1: constructor dieksekusi kapan?",
+                            new String[]{"Saat objek dibuat", "Saat objek dihapus manual", "Saat compile selesai"}, 0),
+                    new PuzzleTask("Nota 2: nama constructor harus sama dengan...",
+                            new String[]{"Nama class", "Nama package", "Nama folder"}, 0),
+                    new PuzzleTask("Nota 3: overloading constructor berarti...",
+                            new String[]{"Beberapa constructor beda parameter", "Constructor tidak boleh dipakai", "Semua method harus static"}, 0),
+                    new PuzzleTask("Nota 4: atribut private sebaiknya diakses lewat...",
+                            new String[]{"Getter dan setter", "Komentar", "Import"}, 0),
+                    new PuzzleTask("Nota 5: this dipakai untuk merujuk...",
+                            new String[]{"Objek saat ini", "Class lain selalu", "File manifest"}, 0)
                 },
-                2, new Color(182, 158, 118), new Color(82, 91, 61), new Color(123, 77, 45), new Color(115, 174, 97)
+                2,
+                new Color(182, 158, 118),
+                new Color(82, 91, 61),
+                new Color(123, 77, 45),
+                new Color(115, 174, 97)
         );
     }
 
@@ -196,68 +161,70 @@ public class CampusBuildingPanel extends JPanel {
                 "Laci Arsip",
                 "Kunci Rektorat",
                 new PuzzleTask[]{
-                    new PuzzleTask(
-                        "Konteks: Anda harus memindahkan 3 brankas ke lantai bawah dengan Lift VIP. Kapasitas angkut lift maksimal 150 kg (lift tak bisa turun tanpa Anda).",
-                        "Berat Anda 60kg. Brankas Emas (60kg), Perak (50kg), dan Perunggu (40kg). Berapa kali minimum lift harus bergerak TURUN agar semua brankas sampai ke bawah?",
-                        new String[]{"1 kali", "2 kali", "3 kali", "4 kali"}, 1,
-                        "Turun 1: Anda (60) + Emas (60) = 120 kg. (Anda naik lagi). Turun 2: Anda (60) + Perak (50) + Perunggu (40) = 150 kg. Total perjalanan turun minimum adalah 2 kali."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Rektor menahan Anda dengan Surat Tugas yang ia tunjukkan. Anda harus membuktikan bahwa surat itu palsu.",
-                        "Di bagian bawah surat tertulis:\n'Ditetapkan di Surabaya, pada tanggal 29 Februari 2023.'\nMengapa surat ini terbukti palsu?",
-                        new String[]{"Surabaya bukan ibukota", "Bulan Februari libur panjang", "Tahun 2023 bukan tahun kabisat", "Rektor tidak punya wewenang"}, 2,
-                        "Bulan Februari pada tahun 2023 hanya memiliki 28 hari, bukan tahun kabisat. Sehingga tanggal 29 Februari 2023 tidak pernah ada."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Asisten Rektor butuh kode brankas. Kodenya adalah 'Jam dimulainya Rapat Senat'.",
-                        "Rektor pergi jam 12:00 setelah rapat beruntun. Agendanya: Rapat Keuangan (1 jam), Mahasiswa (30 mnt), Senat (45 mnt). Urutannya: Senat lalu Mahasiswa lalu Keuangan. Pukul berapa Rapat Senat dimulai?",
-                        new String[]{"0830", "0900", "0945", "1015"}, 2,
-                        "Total waktu = 60 + 30 + 45 = 135 menit (2 jam 15 menit). Jam 12:00 mundur 2 jam 15 menit = 09:45. Senat adalah acara pertama, jadi dimulai pukul 09:45."
-                    )
+                    new PuzzleTask("Arsip 1: modifier private membuat member class...",
+                            new String[]{"Hanya bisa diakses dari class itu sendiri", "Bisa diakses semua package", "Wajib diwariskan"}, 0),
+                    new PuzzleTask("Arsip 2: public berarti member...",
+                            new String[]{"Dapat diakses dari luar class", "Tidak bisa dipanggil", "Hanya untuk constructor"}, 0),
+                    new PuzzleTask("Arsip 3: protected dapat diakses oleh...",
+                            new String[]{"Class turunan dan satu package", "Hanya JVM", "File gambar"}, 0),
+                    new PuzzleTask("Arsip 4: package di Java berguna untuk...",
+                            new String[]{"Mengelompokkan class", "Menghapus objek", "Membuat warna"}, 0),
+                    new PuzzleTask("Arsip 5: import dipakai untuk...",
+                            new String[]{"Menggunakan class dari package lain", "Menyimpan nilai private", "Mengubah nama class"}, 0)
                 },
-                3, new Color(171, 151, 135), new Color(88, 61, 52), new Color(116, 78, 57), new Color(171, 103, 83)
+                3,
+                new Color(171, 151, 135),
+                new Color(88, 61, 52),
+                new Color(116, 78, 57),
+                new Color(171, 103, 83)
         );
     }
 
     public static CampusBuildingPanel createDormitory(MainFrame frame) {
         return new CampusBuildingPanel(
                 frame,
-                "Gedung Kelas",
+                "Asrama",
                 "Papan Pengumuman",
                 "Pengumuman malam: kunci asli ditaruh di loker penjaga asrama.",
                 "Loker Lama",
                 "Loker-loker lain sengaja diisi kunci palsu untuk mengecoh mahasiswa.",
                 "Loker Penjaga",
-                "Kunci Gedung Kelas",
+                "Kunci Asrama",
                 new PuzzleTask[]{
-                    new PuzzleTask(
-                        "Konteks: Anda perlu mengambil ID Card dari loker ketua kelas. Loker digembok PIN 2 digit. Petunjuk: Kodenya adalah nomor urut presensi anak yang bolos hari ini.",
-                        "Total 30 mahasiswa. Nomor urutnya adalah angka genap, habis dibagi 3, dan jika angka-angka penyusunnya dijumlahkan, hasilnya adalah 6. Berapakah PIN loker tersebut?",
-                        new String[]{"12", "18", "24", "30"}, 2,
-                        "Angka genap di bawah 30 yang habis dibagi 3: 6, 12, 18, 24. Dari angka tersebut, hanya 2 + 4 yang jumlahnya 6. Jawabannya 24."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Dosen menyembunyikan kunci di salah satu dari 4 meja ujian yang tersusun sebaris ke belakang (Posisi 1, 2, 3, 4).",
-                        "Meja Budi tepat di depan Cici. Meja Deni paling belakang (4). Meja Anton TIDAK bersebelahan dengan Deni.\nJika kunci ada di meja Cici, di posisi berapakah kuncinya?",
-                        new String[]{"Posisi 1", "Posisi 2", "Posisi 3", "Posisi 4"}, 2,
-                        "Deni di 4. Anton tidak boleh di 3, maka Anton di 1. Sisa 2 dan 3 untuk Budi dan Cici. Karena Budi di depan Cici, Budi di 2 dan Cici di 3."
-                    ),
-                    new PuzzleTask(
-                        "Konteks: Keypad pintu meminta hasil dari pola aneh di papan tulis.",
-                        "Jika:\n5 -> 3 = 18\n4 -> 2 = 10\n7 -> 4 = 32\nMaka berapakah hasil dari 6 -> 5 = ?",
-                        new String[]{"30", "35", "40", "42"}, 1,
-                        "Polanya adalah (A x B) + B. Maka (6 x 5) + 5 = 30 + 5 = 35."
-                    )
+                    new PuzzleTask("Jadwal 1: getter dan setter dipakai untuk...",
+                            new String[]{"Mengisi dan mengambil data private", "Menghapus objek", "Mengubah class menjadi package"}, 0),
+                    new PuzzleTask("Jadwal 2: getter biasanya mengembalikan...",
+                            new String[]{"Nilai atribut", "Nama folder", "Error compile"}, 0),
+                    new PuzzleTask("Jadwal 3: setter biasanya menerima...",
+                            new String[]{"Parameter nilai baru", "Gambar ruangan", "Nama keyboard"}, 0),
+                    new PuzzleTask("Jadwal 4: abstraksi berarti fokus pada...",
+                            new String[]{"Hal penting dan menyembunyikan detail", "Semua kode harus panjang", "Tidak boleh ada objek"}, 0),
+                    new PuzzleTask("Jadwal 5: object memiliki...",
+                            new String[]{"State dan behavior", "Hanya package", "Hanya komentar"}, 0)
                 },
-                4, new Color(159, 142, 164), new Color(74, 60, 84), new Color(91, 70, 112), new Color(157, 119, 177)
+                4,
+                new Color(159, 142, 164),
+                new Color(74, 60, 84),
+                new Color(91, 70, 112),
+                new Color(157, 119, 177)
         );
     }
 
     private CampusBuildingPanel(
-            MainFrame frame, String roomName, String clueSpotName, String clueText,
-            String infoSpotName, String infoText, String storageSpotName, String realKeyName,
-            PuzzleTask[] puzzleTasks, int roomStyle, Color floorColor, Color wallColor,
-            Color furnitureColor, Color accentColor
+            MainFrame frame,
+            String roomName,
+            String clueSpotName,
+            String clueText,
+            String infoSpotName,
+            String infoText,
+            String storageSpotName,
+            String realKeyName,
+            PuzzleTask[] puzzleTasks,
+            int roomStyle,
+            Color floorColor,
+            Color wallColor,
+            Color furnitureColor,
+            Color accentColor
     ) {
         this.frame = frame;
         this.roomName = roomName;
@@ -267,22 +234,21 @@ public class CampusBuildingPanel extends JPanel {
         this.infoText = infoText;
         this.storageSpotName = storageSpotName;
         this.realKeyName = realKeyName;
-        
         this.puzzleTasks = new ArrayList<>();
-        Collections.addAll(this.puzzleTasks, puzzleTasks);
-        this.activePuzzles = new HashMap<>();
-
+        for (PuzzleTask puzzleTask : puzzleTasks) {
+            this.puzzleTasks.add(puzzleTask);
+        }
         this.roomStyle = roomStyle;
         this.floorColor = floorColor;
         this.wallColor = wallColor;
         this.furnitureColor = furnitureColor;
         this.accentColor = accentColor;
-        
         this.player = new Rectangle(510, 670, PLAYER_SIZE, PLAYER_SIZE);
         this.obstacles = new ArrayList<>();
         this.spots = new ArrayList<>();
         this.keys = new ArrayList<>();
         this.enemies = new ArrayList<>();
+        this.missionText = getRoomHint();
 
         setBackground(wallColor);
         setFocusable(true);
@@ -295,48 +261,19 @@ public class CampusBuildingPanel extends JPanel {
             repaint();
         });
         gameLoop.setCoalesce(true);
-        
-        getPlayerImage(); // Muat sprite karakter
-    }
-
-    // --- FUNGSI MENGAMBIL SPRITE DARI FOLDER ---
-    private void getPlayerImage() {
-        try {
-            String folder = (GameManager.playerGender == 1) ? "asset player GIRL/" : "asset player BOY/";
-            String prefix = (GameManager.playerGender == 1) ? "girl " : "boy ";
-            String basePath = "/escapefromcampus/assets/" + folder + prefix;
-
-            up1 = loadImg(basePath + "atas 1.png");
-            up2 = loadImg(basePath + "atas 2.png");
-            down1 = loadImg(basePath + "bawah 1.png");
-            down2 = loadImg(basePath + "bawah 2.png");
-            left1 = loadImg(basePath + "kiri 1.png");
-            left2 = loadImg(basePath + "kiri 2.png");
-            right1 = loadImg(basePath + "kanan 1.png");
-            right2 = loadImg(basePath + "kanan 2.png");
-        } catch (Exception e) {
-            System.out.println("Gagal memuat sprite: " + e.getMessage());
-        }
-    }
-
-    private Image loadImg(String path) {
-        URL imgUrl = getClass().getResource(path);
-        if (imgUrl != null) {
-            return new ImageIcon(imgUrl).getImage();
-        }
-        return null;
     }
 
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
+
         if (visible) {
             stopMovement();
             updateCamera();
             if (!gameLoop.isRunning()) {
                 gameLoop.start();
             }
-            javax.swing.SwingUtilities.invokeLater(this::requestFocusInWindow);
+            requestFocusInWindow();
         } else {
             stopMovement();
             gameLoop.stop();
@@ -346,12 +283,14 @@ public class CampusBuildingPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics graphics) {
         super.paintComponent(graphics);
+
         Graphics2D g = (Graphics2D) graphics.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         drawScene(g);
         drawHud(g);
         drawMiniMap(g);
+
         g.dispose();
     }
 
@@ -363,6 +302,7 @@ public class CampusBuildingPanel extends JPanel {
         puzzlesSolved = 0;
         enemyHitCooldown = 0;
         nearbySpot = null;
+        missionText = getRoomHint();
 
         for (InteriorKey key : keys) {
             key.collected = false;
@@ -373,9 +313,7 @@ public class CampusBuildingPanel extends JPanel {
         for (PatrolEnemy enemy : enemies) {
             enemy.reset();
         }
-        
-        getPlayerImage();
-        assignRandomPuzzles();
+
         updateCamera();
         repaint();
     }
@@ -402,13 +340,11 @@ public class CampusBuildingPanel extends JPanel {
         spots.add(new RoomSpot(clueSpotName, 405, 116, 240, 90));
         spots.add(new RoomSpot(infoSpotName, 78, 315, 95, 120));
         spots.add(new RoomSpot(storageSpotName, 835, 585, 120, 90));
-        spots.add(new RoomSpot("Akses 1", 215, 265, 110, 52));
-        spots.add(new RoomSpot("Akses 2", 760, 265, 110, 52));
-        spots.add(new RoomSpot("Akses 3", 215, 500, 110, 52));
-        spots.add(new RoomSpot("Akses 4", 760, 500, 110, 52));
-        spots.add(new RoomSpot("Akses 5", 470, 610, 110, 52));
-        
-        assignRandomPuzzles();
+        spots.add(new RoomSpot("Puzzle 1", 215, 265, 110, 52));
+        spots.add(new RoomSpot("Puzzle 2", 760, 265, 110, 52));
+        spots.add(new RoomSpot("Puzzle 3", 215, 500, 110, 52));
+        spots.add(new RoomSpot("Puzzle 4", 760, 500, 110, 52));
+        spots.add(new RoomSpot("Puzzle 5", 470, 610, 110, 52));
 
         keys.add(new InteriorKey("Kunci Palsu", 245, 390, true));
         keys.add(new InteriorKey("Kunci Palsu", 690, 510, true));
@@ -417,19 +353,6 @@ public class CampusBuildingPanel extends JPanel {
         enemies.add(new PatrolEnemy(185, 248, 34, 34, 185, 830, 248, 248, 2, 0));
         enemies.add(new PatrolEnemy(830, 408, 34, 34, 185, 830, 408, 408, -3, 0));
         enemies.add(new PatrolEnemy(505, 240, 34, 34, 505, 505, 240, 630, 0, 2));
-    }
-
-    private void assignRandomPuzzles() {
-        activePuzzles.clear();
-        List<String> aksesNames = new ArrayList<>();
-        for (int i = 1; i <= 5; i++) {
-            aksesNames.add("Akses " + i);
-        }
-        Collections.shuffle(aksesNames);
-        
-        for (int i = 0; i < puzzleTasks.size(); i++) {
-            activePuzzles.put(aksesNames.get(i), puzzleTasks.get(i));
-        }
     }
 
     private void installControls() {
@@ -460,6 +383,7 @@ public class CampusBuildingPanel extends JPanel {
     private void bindAction(String keyStroke, String actionName, Runnable action) {
         InputMap inputMap = getInputMap(WHEN_IN_FOCUSED_WINDOW);
         ActionMap actionMap = getActionMap();
+
         inputMap.put(KeyStroke.getKeyStroke(keyStroke), actionName);
         actionMap.put(actionName, new AbstractAction() {
             @Override
@@ -488,10 +412,12 @@ public class CampusBuildingPanel extends JPanel {
                 enemyHitCooldown = 75;
                 player.setLocation(510, 670);
                 stopMovement();
-                showCustomDialog("AWAS!\n\nAnda tertangkap penjaga anomali!\nHindari jalur patrolinya.\n\nNyawa tersisa: " + GameManager.nyawa, null);
+                missionText = "Tertabrak penjaga patroli. Hindari jalurnya seperti Varmintz! Nyawa tersisa: "
+                        + GameManager.nyawa + ".";
                 checkGameOver();
             }
         }
+
         if (enemyHitCooldown > 0) {
             enemyHitCooldown--;
         }
@@ -500,42 +426,18 @@ public class CampusBuildingPanel extends JPanel {
     private void movePlayer() {
         int dx = 0;
         int dy = 0;
-        boolean isMoving = false;
 
         if (upPressed) {
             dy -= PLAYER_SPEED;
-            direction = "up";
-            isMoving = true;
         }
         if (downPressed) {
             dy += PLAYER_SPEED;
-            direction = "down";
-            isMoving = true;
         }
         if (leftPressed) {
             dx -= PLAYER_SPEED;
-            direction = "left";
-            isMoving = true;
         }
         if (rightPressed) {
             dx += PLAYER_SPEED;
-            direction = "right";
-            isMoving = true;
-        }
-
-        // LOGIKA ANIMASI SPRITE
-        if (isMoving) {
-            spriteCounter++;
-            if (spriteCounter > 10) { 
-                if (spriteNum == 1) {
-                    spriteNum = 2;
-                } else if (spriteNum == 2) {
-                    spriteNum = 1;
-                }
-                spriteCounter = 0;
-            }
-        } else {
-            spriteNum = 1;
         }
 
         if (dx != 0 && dy != 0) {
@@ -548,12 +450,15 @@ public class CampusBuildingPanel extends JPanel {
     }
 
     private void tryMove(int dx, int dy) {
-        if (dx == 0 && dy == 0) return;
+        if (dx == 0 && dy == 0) {
+            return;
+        }
 
         Rectangle nextPosition = new Rectangle(player);
         nextPosition.translate(dx, dy);
 
-        if (nextPosition.x < 40 || nextPosition.y < 80
+        if (nextPosition.x < 40
+                || nextPosition.y < 80
                 || nextPosition.x + nextPosition.width > ROOM_WIDTH - 40
                 || nextPosition.y + nextPosition.height > ROOM_HEIGHT - 28) {
             return;
@@ -564,40 +469,8 @@ public class CampusBuildingPanel extends JPanel {
                 return;
             }
         }
+
         player.setBounds(nextPosition);
-    }
-
-    // --- MENGGAMBAR SPRITE KARAKTER PADA LAYER ---
-    private void drawPlayer(Graphics2D g) {
-        Image image = null;
-
-        switch (direction) {
-            case "up": image = (spriteNum == 1) ? up1 : up2; break;
-            case "down": image = (spriteNum == 1) ? down1 : down2; break;
-            case "left": image = (spriteNum == 1) ? left1 : left2; break;
-            case "right": image = (spriteNum == 1) ? right1 : right2; break;
-        }
-
-        if (image != null) {
-            // Gambar bayangan di bawah kaki
-            g.setColor(new Color(0, 0, 0, 70));
-            g.fillOval(player.x + 3, player.y + player.height - 8, player.width - 4, 12);
-            
-            // Gambar sprite
-            g.drawImage(image, player.x - 6, player.y - 14, player.width + 12, player.height + 18, null);
-        } else {
-            // Fallback cadangan
-            g.setColor(new Color(0, 0, 0, 70));
-            g.fillOval(player.x + 3, player.y + 24, player.width - 4, 12);
-            g.setColor(new Color(48, 76, 171));
-            g.fillRoundRect(player.x + 5, player.y + 12, 22, 22, 10, 10);
-            g.setColor(new Color(238, 195, 146));
-            g.fillOval(player.x + 6, player.y, 20, 20);
-            g.setColor(new Color(30, 35, 65));
-            g.fillArc(player.x + 6, player.y - 2, 20, 14, 0, 180);
-            g.setColor(new Color(20, 20, 20));
-            g.drawOval(player.x + 6, player.y, 20, 20);
-        }
     }
 
     private void collectKeys() {
@@ -605,6 +478,7 @@ public class CampusBuildingPanel extends JPanel {
             if (key.collected || !player.intersects(key.bounds)) {
                 continue;
             }
+
             collectFakeKey(key);
         }
     }
@@ -613,12 +487,13 @@ public class CampusBuildingPanel extends JPanel {
         key.collected = true;
         GameManager.kunciPalsu++;
         GameManager.nyawa--;
-        showCustomDialog("JEBAKAN!\n\nItu kunci jebakan berbentuk wajik merah!\nNyawa berkurang.\nKunci palsu terkumpul: " + GameManager.kunciPalsu, null);
+        missionText = "Itu kunci palsu berbentuk wajik merah. Nyawa berkurang. Palsu: " + GameManager.kunciPalsu + ".";
         checkGameOver();
     }
 
     private void updateNearbySpot() {
         nearbySpot = null;
+
         Rectangle interactionRange = new Rectangle(player);
         interactionRange.grow(24, 24);
 
@@ -640,168 +515,95 @@ public class CampusBuildingPanel extends JPanel {
         cameraY = clamp(cameraY, 0, Math.max(0, ROOM_HEIGHT - viewHeight));
     }
 
-    // --- METODE CUSTOM DIALOG (Pop Up Abu Transparan) ---
-    private int showCustomDialog(String message, String[] options) {
-        JDialog dialog = new JDialog(frame, true);
-        dialog.setUndecorated(true);
-        dialog.setBackground(new Color(0, 0, 0, 0)); 
-        dialog.setSize(800, 500); 
-        dialog.setLocationRelativeTo(frame);
-
-        JPanel bgPanel = new JPanel(new BorderLayout(20, 20)) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(0, 0, 0, 210)); 
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                g2.setStroke(new BasicStroke(3));
-                g2.setColor(new Color(255, 255, 255, 100));
-                g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 30, 30);
-            }
-        };
-        bgPanel.setOpaque(false);
-        bgPanel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40)); 
-
-        JTextArea textArea = new JTextArea(message);
-        textArea.setFont(new Font("Arial", Font.BOLD, 18));
-        textArea.setForeground(Color.WHITE);
-        textArea.setOpaque(false);
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setFocusable(false);
-        
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setOpaque(false);
-
-        bgPanel.add(scrollPane, BorderLayout.CENTER);
-
-        final int[] selectedAnswer = {-1};
-
-        if (options != null && options.length > 0) {
-            JPanel btnPanel = new JPanel(new GridLayout(2, 2, 20, 20));
-            btnPanel.setOpaque(false);
-            for (int i = 0; i < options.length; i++) {
-                int index = i;
-                JButton btn = new JButton("<html><center>" + options[i] + "</center></html>");
-                btn.setFont(new Font("Arial", Font.BOLD, 18));
-                btn.setBackground(new Color(60, 90, 140));
-                btn.setForeground(Color.WHITE);
-                btn.setFocusPainted(false);
-                btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                btn.addActionListener(e -> {
-                    selectedAnswer[0] = index;
-                    dialog.dispose();
-                });
-                btnPanel.add(btn);
-            }
-            bgPanel.add(btnPanel, BorderLayout.SOUTH);
-        } else {
-            JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            btnPanel.setOpaque(false);
-            JButton btn = new JButton("LANJUT");
-            btn.setFont(new Font("Arial", Font.BOLD, 18));
-            btn.setBackground(new Color(50, 150, 80));
-            btn.setForeground(Color.WHITE);
-            btn.setFocusPainted(false);
-            btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            btn.addActionListener(e -> dialog.dispose());
-            btnPanel.add(btn);
-            bgPanel.add(btnPanel, BorderLayout.SOUTH);
-        }
-
-        dialog.add(bgPanel);
-        dialog.setVisible(true);
-
-        return selectedAnswer[0];
-    }
-    // ---------------------------------------------------
-
-   private void interact() {
+    private void interact() {
         updateNearbySpot();
 
         if (nearbySpot == null) {
+            missionText = "Tidak ada objek penting di dekat sini.";
             return;
         }
 
-        javax.swing.SwingUtilities.invokeLater(() -> {
-            if ("Pintu Keluar".equals(nearbySpot.name)) {
-                frame.showPanel("Level1");
-            } else if (clueSpotName.equals(nearbySpot.name)) {
-                clueFound = true;
-                showCustomDialog("PETUNJUK UTAMA\n\n" + clueText + "\n\nKunci asli disembunyikan di " + storageSpotName + ".", null);
-            } else if (infoSpotName.equals(nearbySpot.name)) {
-                showCustomDialog("INFORMASI\n\n" + infoText + "\n\nKunci palsu berbentuk wajik merah tersebar di antara meja dan rak.", null);
-            } else if (nearbySpot.name.startsWith("Akses ")) {
-                PuzzleTask task = activePuzzles.get(nearbySpot.name);
-                if (task != null) {
-                    openRoomPuzzle(task);
-                } else {
-                    // MENGGUNAKAN FUN FACT ACAK DI SINI
-                    showCustomDialog("KOSONG\n\nFun Fact: " + getRandomFunFact(), null);
-                }
-            } else if (storageSpotName.equals(nearbySpot.name)) {
-                if (clueFound && puzzlesSolved >= PUZZLE_TARGET) {
-                    openStoragePuzzle();
-                } else if (!clueFound) {
-                    // MENGGUNAKAN FUN FACT ACAK DI SINI
-                    showCustomDialog("TERKUNCI\n\n" + storageSpotName + " Terkunci!\n\nFun Fact: " + getRandomFunFact() + "\n\nCoba periksa area " + clueSpotName + " terlebih dahulu.", null);
-                } else {
-                    showCustomDialog("TERKUNCI\n\n" + storageSpotName + " terkunci.\nAnda harus menyelesaikan ke-" + PUZZLE_TARGET + " pertanyaan terlebih dahulu.\nProgres saat ini: " + puzzlesSolved + "/" + PUZZLE_TARGET, null);
-                }
+        if ("Pintu Keluar".equals(nearbySpot.name)) {
+            frame.showPanel("Level1");
+        } else if (clueSpotName.equals(nearbySpot.name)) {
+            clueFound = true;
+            missionText = clueText + " Kunci asli disembunyikan di " + storageSpotName + ".";
+        } else if (infoSpotName.equals(nearbySpot.name)) {
+            missionText = infoText + " Kunci palsu berbentuk wajik merah tersebar di antara meja dan rak.";
+        } else if (nearbySpot.name.startsWith("Puzzle ")) {
+            openRoomPuzzle(Integer.parseInt(nearbySpot.name.substring(7)) - 1);
+        } else if (storageSpotName.equals(nearbySpot.name)) {
+            if (clueFound && puzzlesSolved >= PUZZLE_TARGET) {
+                openStoragePuzzle();
+            } else if (!clueFound) {
+                missionText = storageSpotName + " terkunci. Cari petunjuk utama di " + clueSpotName + ".";
+            } else {
+                missionText = storageSpotName + " terkunci. Selesaikan 5 puzzle OOP dulu. Progres: "
+                        + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
             }
-        });
+        }
     }
-   
-    private void openRoomPuzzle(PuzzleTask puzzleTask) {
-        if (puzzleTask.solved) {
-            showCustomDialog("AKSES SELESAI\n\nAkses ini sudah berhasil Anda perbaiki.", null);
+
+    private String getRoomHint() {
+        return "Misi: hindari penjaga, baca " + clueSpotName + ", selesaikan 5 puzzle OOP bernomor, lalu buka "
+                + storageSpotName + ".";
+    }
+
+    private void openRoomPuzzle(int index) {
+        if (index < 0 || index >= puzzleTasks.size()) {
+            missionText = "Puzzle ini belum aktif.";
             return;
         }
 
-        // Gabungkan Konteks dan Pertanyaan dalam satu Pop Up
-        String puzzleText = puzzleTask.konteks + "\n\nPERTANYAAN:\n" + puzzleTask.soal;
-        
-        int answer = showCustomDialog(puzzleText, puzzleTask.options);
+        PuzzleTask puzzleTask = puzzleTasks.get(index);
+        if (puzzleTask.solved) {
+            missionText = "Puzzle " + (index + 1) + " sudah selesai. Progres: "
+                    + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
+            return;
+        }
 
-        // Tampilkan Jawaban dan Logika
+        int answer = JOptionPane.showOptionDialog(
+                this,
+                puzzleTask.question,
+                "Puzzle OOP " + (index + 1) + " - " + roomName,
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                puzzleTask.options,
+                puzzleTask.options[puzzleTask.correctIndex]
+        );
+
         if (answer == puzzleTask.correctIndex) {
             puzzleTask.solved = true;
             puzzlesSolved++;
-            
-            String successMsg = "JAWABAN BENAR!\n\nPenjelasan:\n" + puzzleTask.logika;
+            missionText = "Puzzle " + (index + 1) + " benar. Progres: "
+                    + puzzlesSolved + "/" + PUZZLE_TARGET + ".";
             if (puzzlesSolved >= PUZZLE_TARGET) {
-                successMsg += "\n\nSemua teka-teki logika selesai!\nSistem keamanan terbuka, segera periksa " + storageSpotName + "!";
+                missionText += " Semua puzzle selesai, sekarang buka " + storageSpotName + ".";
             }
-            showCustomDialog(successMsg, null);
-            
-        } else if (answer >= 0) { 
+        } else if (answer >= 0) {
             GameManager.nyawa--;
-            String failMsg = "JAWABAN SALAH!\n\nJawaban yang benar:\n" + puzzleTask.options[puzzleTask.correctIndex] + "\n\nPenjelasan:\n" + puzzleTask.logika + "\n\nNyawa berkurang! Sisa nyawa: " + GameManager.nyawa;
-            showCustomDialog(failMsg, null);
+            missionText = "Puzzle " + (index + 1) + " salah. Nyawa tersisa: " + GameManager.nyawa
+                    + ". Coba baca petunjuk lagi.";
             checkGameOver();
         }
     }
 
     private void openStoragePuzzle() {
         if (realKeyCollected) {
-            showCustomDialog("KOSONG\n\n" + storageSpotName + " sudah kosong. Kunci asli sudah diambil.", null);
+            missionText = storageSpotName + " sudah kosong. Kunci asli ruangan ini sudah kamu ambil.";
             return;
         }
 
         realKeyCollected = true;
         GameManager.kunci++;
-        showCustomDialog("BERHASIL!\n\nAnda berhasil menemukan " + realKeyName + " di dalam " + storageSpotName + "!\n\nKunci Asli Terkumpul: " + GameManager.kunci + "/" + GameManager.KUNCI_TARGET, null);
+        missionText = "Semua puzzle selesai. Kamu menemukan " + realKeyName + " di " + storageSpotName + ".";
+        JOptionPane.showMessageDialog(this, realKeyName + " didapat setelah menyelesaikan 5 puzzle OOP!");
     }
 
     private void checkGameOver() {
         if (GameManager.nyawa <= 0) {
-            showCustomDialog("GAME OVER\n\nNyawa Anda habis! Anda gagal kabur.", null);
+            JOptionPane.showMessageDialog(this, "Nyawa habis. GAME OVER.");
             frame.showPanel("Menu");
         }
     }
@@ -835,8 +637,12 @@ public class CampusBuildingPanel extends JPanel {
         g.fillRect(0, 0, ROOM_WIDTH, ROOM_HEIGHT);
 
         g.setColor(new Color(0, 0, 0, 28));
-        for (int x = 40; x < ROOM_WIDTH; x += 80) g.drawLine(x, 80, x, ROOM_HEIGHT - 28);
-        for (int y = 80; y < ROOM_HEIGHT; y += 80) g.drawLine(40, y, ROOM_WIDTH - 40, y);
+        for (int x = 40; x < ROOM_WIDTH; x += 80) {
+            g.drawLine(x, 80, x, ROOM_HEIGHT - 28);
+        }
+        for (int y = 80; y < ROOM_HEIGHT; y += 80) {
+            g.drawLine(40, y, ROOM_WIDTH - 40, y);
+        }
 
         g.setColor(wallColor);
         g.fillRect(0, 0, ROOM_WIDTH, 82);
@@ -905,7 +711,7 @@ public class CampusBuildingPanel extends JPanel {
                 g.setColor(new Color(205, 196, 225));
                 g.fillOval(x + 18, 350, 6, 6);
             }
-            drawCenteredText(g, "GEDUNG KELAS", 365, 96, 320, Color.WHITE, Font.BOLD, 16);
+            drawCenteredText(g, "ASRAMA", 365, 96, 320, Color.WHITE, Font.BOLD, 16);
         }
     }
 
@@ -917,22 +723,7 @@ public class CampusBuildingPanel extends JPanel {
         g.setColor(new Color(239, 199, 76));
         g.fillOval(565, ROOM_HEIGHT - 44, 8, 8);
     }
-// --- KUMPULAN FUN FACT ACAK ---
-    private final String[] funFacts = {
-        "UNESA dulunya bernama IKIP Surabaya sebelum resmi berubah status menjadi Universitas.",
-        "UNESA memiliki dua kampus utama yang luas, yaitu Kampus Lidah Wetan dan Kampus Ketintang.",
-        "Semboyan kebanggaan UNESA adalah 'Growing with Character' (Tumbuh Berkembang Bersama Karakter).",
-        "Gedung Rektorat UNESA di Kampus Lidah Wetan memiliki desain arsitektur unik yang menyerupai burung garuda.",
-        "UNESA dikenal sebagai salah satu kampus pencetak atlet berprestasi tingkat nasional maupun internasional.",
-        "UNESA memiliki Pusat Studi Layanan Disabilitas (PSLD) yang menjadikannya salah satu kampus inklusi terbaik di Indonesia.",
-        "Terdapat danau buatan yang asri di kawasan kampus Lidah Wetan, sering jadi tempat favorit mahasiswa bersantai.",
-        "Fakultas Teknik UNESA terus mengembangkan inovasi teknologi cerdas dan vokasi untuk masa depan."
-    };
 
-    private String getRandomFunFact() {
-        int index = (int) (Math.random() * funFacts.length);
-        return funFacts[index];
-    }
     private void drawFurniture(Graphics2D g) {
         for (RoomObject obstacle : obstacles) {
             Rectangle b = obstacle.bounds;
@@ -952,6 +743,7 @@ public class CampusBuildingPanel extends JPanel {
                 g.fillRect(b.x + b.width - 32, b.y + 12, 18, 24);
             }
         }
+
         g.setColor(new Color(235, 235, 220));
         g.setFont(new Font("Arial", Font.BOLD, 18));
         drawCenteredText(g, roomName, 365, 168, 320, Color.WHITE, Font.BOLD, 18);
@@ -961,14 +753,12 @@ public class CampusBuildingPanel extends JPanel {
         for (RoomSpot spot : spots) {
             Rectangle b = spot.bounds;
             boolean active = spot == nearbySpot;
-            boolean isSpotAkses = spot.name.startsWith("Akses ");
-            
-            boolean hasPuzzle = activePuzzles.containsKey(spot.name);
-            boolean solvedPuzzle = hasPuzzle && activePuzzles.get(spot.name).solved;
+            boolean puzzleSpot = spot.name.startsWith("Puzzle ");
+            boolean solvedPuzzle = puzzleSpot && isPuzzleSolved(spot.name);
 
-            if (isSpotAkses && solvedPuzzle) {
+            if (solvedPuzzle) {
                 g.setColor(active ? new Color(102, 210, 124, 145) : new Color(75, 178, 98, 88));
-            } else if (isSpotAkses) {
+            } else if (puzzleSpot) {
                 g.setColor(active ? new Color(92, 195, 236, 150) : new Color(92, 195, 236, 70));
             } else {
                 g.setColor(active ? new Color(250, 218, 92, 130) : new Color(255, 255, 255, 48));
@@ -978,23 +768,27 @@ public class CampusBuildingPanel extends JPanel {
             g.setStroke(new BasicStroke(active ? 3 : 1));
             g.drawRoundRect(b.x, b.y, b.width, b.height, 12, 12);
 
-            if (isSpotAkses) {
-                String label = solvedPuzzle ? "OK" : spot.name;
-                drawCenteredText(g, label, b.x, b.y + 8, b.width,
+            if (puzzleSpot) {
+                drawCenteredText(g, solvedPuzzle ? "OK" : spot.name, b.x, b.y + 8, b.width,
                         solvedPuzzle ? new Color(20, 80, 35) : new Color(25, 62, 82), Font.BOLD, 13);
+            }
+
+            if (active) {
+                drawCenteredText(g, "Tekan E", b.x, b.y + 24, b.width, new Color(48, 38, 20), Font.BOLD, 14);
             }
         }
     }
 
+    private boolean isPuzzleSolved(String spotName) {
+        int index = Integer.parseInt(spotName.substring(7)) - 1;
+        return index >= 0 && index < puzzleTasks.size() && puzzleTasks.get(index).solved;
+    }
+
     private void drawStorage(Graphics2D g) {
-        RoomSpot storageSpot = null;
-        for (RoomSpot spot : spots) {
-            if (spot.name.equals(storageSpotName)) {
-                storageSpot = spot;
-                break;
-            }
+        RoomSpot storageSpot = findSpot(storageSpotName);
+        if (storageSpot == null) {
+            return;
         }
-        if (storageSpot == null) return;
 
         Rectangle b = storageSpot.bounds;
         boolean active = storageSpot == nearbySpot;
@@ -1019,12 +813,29 @@ public class CampusBuildingPanel extends JPanel {
             g.fillOval(b.x + b.width / 2 - 4, b.y + 66, 8, 8);
         }
 
-        drawCenteredText(g, realKeyCollected ? "Kosong" : "Kunci", b.x, b.y + 4, b.width, Color.WHITE, Font.BOLD, 12);
+        if (realKeyCollected) {
+            drawCenteredText(g, "Kosong", b.x, b.y + 4, b.width, Color.WHITE, Font.BOLD, 12);
+        } else {
+            drawCenteredText(g, "Kunci", b.x, b.y + 4, b.width, Color.WHITE, Font.BOLD, 12);
+        }
+    }
+
+    private RoomSpot findSpot(String name) {
+        for (RoomSpot spot : spots) {
+            if (spot.name.equals(name)) {
+                return spot;
+            }
+        }
+
+        return null;
     }
 
     private void drawKeys(Graphics2D g) {
         for (InteriorKey key : keys) {
-            if (key.collected) continue;
+            if (key.collected) {
+                continue;
+            }
+
             if (key.fake) {
                 drawFakeKey(g, key.bounds);
             } else {
@@ -1084,28 +895,53 @@ public class CampusBuildingPanel extends JPanel {
         }
     }
 
+    private void drawPlayer(Graphics2D g) {
+        g.setColor(new Color(0, 0, 0, 70));
+        g.fillOval(player.x + 3, player.y + 24, player.width - 4, 12);
+        g.setColor(new Color(48, 76, 171));
+        g.fillRoundRect(player.x + 5, player.y + 12, 22, 22, 10, 10);
+        g.setColor(new Color(238, 195, 146));
+        g.fillOval(player.x + 6, player.y, 20, 20);
+        g.setColor(new Color(30, 35, 65));
+        g.fillArc(player.x + 6, player.y - 2, 20, 14, 0, 180);
+        g.setColor(new Color(20, 20, 20));
+        g.drawOval(player.x + 6, player.y, 20, 20);
+    }
+
     private void drawHud(Graphics2D g) {
-        // Kotak Abu Transparan Kiri Atas
         g.setColor(new Color(20, 24, 28, 210));
-        g.fillRoundRect(18, 16, 680, 80, 12, 12);
-
+        g.fillRoundRect(18, 16, 552, 116, 12, 12);
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 18));
-        String pName = (GameManager.playerName == null || GameManager.playerName.isEmpty()) ? "Mahasiswa" : GameManager.playerName;
-        g.drawString(roomName + "  |  " + pName, 34, 45);
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        g.drawString("Interior - " + roomName, 34, 42);
 
-        g.setFont(new Font("Arial", Font.PLAIN, 15));
-        String stats = String.format("Nyawa: %d    Kunci Asli: %d/%d    Kunci Palsu: %d    Akses: %d/%d", 
-                GameManager.nyawa, GameManager.kunci, GameManager.KUNCI_TARGET, GameManager.kunciPalsu, puzzlesSolved, PUZZLE_TARGET);
-        g.drawString(stats, 34, 75);
+        g.setFont(new Font("Arial", Font.PLAIN, 14));
+        g.drawString(
+                "Nyawa: " + GameManager.nyawa
+                + "    Kunci asli: " + GameManager.kunci + "/" + GameManager.KUNCI_TARGET
+                + "    Puzzle: " + puzzlesSolved + "/" + PUZZLE_TARGET
+                + "    Palsu: " + GameManager.kunciPalsu,
+                34,
+                68
+        );
+        drawWrappedText(g, missionText, 34, 90, 500, 2, 18);
 
-        // Box Bantuan Bawah
-        String helpText = "WASD/Arrow: Jalan    E: Interaksi    Hindari Penjaga    Esc: Keluar";
+        String helpText = "WASD/Arrow: jalan    E: interaksi    Hindari penjaga merah    Esc: keluar";
         int helpWidth = g.getFontMetrics().stringWidth(helpText);
         g.setColor(new Color(20, 24, 28, 190));
         g.fillRoundRect(18, getHeight() - 54, helpWidth + 32, 36, 12, 12);
         g.setColor(Color.WHITE);
         g.drawString(helpText, 34, getHeight() - 31);
+
+        if (nearbySpot != null) {
+            String prompt = "Dekat: " + nearbySpot.name + " | Tekan E";
+            int promptWidth = g.getFontMetrics().stringWidth(prompt);
+            g.setColor(new Color(244, 210, 82, 230));
+            g.fillRoundRect((getWidth() - promptWidth) / 2 - 18, 18, promptWidth + 36, 38, 12, 12);
+            g.setColor(new Color(45, 36, 20));
+            g.setFont(new Font("Arial", Font.BOLD, 15));
+            g.drawString(prompt, (getWidth() - promptWidth) / 2, 43);
+        }
     }
 
     private void drawMiniMap(Graphics2D g) {
@@ -1159,13 +995,51 @@ public class CampusBuildingPanel extends JPanel {
     }
 
     private void drawCenteredText(
-            Graphics2D g, String text, int x, int y, int width, Color color, int style, int size
+            Graphics2D g,
+            String text,
+            int x,
+            int y,
+            int width,
+            Color color,
+            int style,
+            int size
     ) {
         g.setFont(new Font("Arial", style, size));
         FontMetrics metrics = g.getFontMetrics();
         int textX = x + (width - metrics.stringWidth(text)) / 2;
         g.setColor(color);
         g.drawString(text, textX, y + metrics.getAscent());
+    }
+
+    private void drawWrappedText(Graphics2D g, String text, int x, int y, int maxWidth, int maxLines, int lineHeight) {
+        FontMetrics metrics = g.getFontMetrics();
+        String[] words = text.split(" ");
+        StringBuilder line = new StringBuilder();
+        int drawnLines = 0;
+
+        for (String word : words) {
+            String nextLine = line.length() == 0 ? word : line + " " + word;
+
+            if (metrics.stringWidth(nextLine) <= maxWidth) {
+                line = new StringBuilder(nextLine);
+                continue;
+            }
+
+            if (line.length() > 0) {
+                g.drawString(line.toString(), x, y + drawnLines * lineHeight);
+                drawnLines++;
+            }
+
+            if (drawnLines >= maxLines) {
+                return;
+            }
+
+            line = new StringBuilder(word);
+        }
+
+        if (line.length() > 0 && drawnLines < maxLines) {
+            g.drawString(line.toString(), x, y + drawnLines * lineHeight);
+        }
     }
 
     private int clamp(int value, int min, int max) {
@@ -1195,19 +1069,15 @@ public class CampusBuildingPanel extends JPanel {
     }
 
     private static class PuzzleTask {
-        private final String konteks;
-        private final String soal;
+        private final String question;
         private final String[] options;
         private final int correctIndex;
-        private final String logika;
         private boolean solved;
 
-        private PuzzleTask(String konteks, String soal, String[] options, int correctIndex, String logika) {
-            this.konteks = konteks;
-            this.soal = soal;
+        private PuzzleTask(String question, String[] options, int correctIndex) {
+            this.question = question;
             this.options = options;
             this.correctIndex = correctIndex;
-            this.logika = logika;
         }
     }
 

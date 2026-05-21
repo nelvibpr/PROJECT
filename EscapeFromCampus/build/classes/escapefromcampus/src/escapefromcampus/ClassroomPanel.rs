@@ -1,4 +1,0 @@
-escapefromcampus.ClassroomPanel$RoomSpot
-escapefromcampus.ClassroomPanel
-escapefromcampus.ClassroomPanel$1
-escapefromcampus.ClassroomPanel$RoomObject
