@@ -78,6 +78,8 @@ public class CampusBuildingPanel extends JPanel {
     private RoomSpot nearbySpot;
 
     // --- VARIABEL ANIMASI SPRITE ---
+    private Image npcImage;
+    private Image aksesImage;
     private Image up1, up2, down1, down2, left1, left2, right1, right2;
     private String direction = "down"; 
     private int spriteCounter = 0;     
@@ -314,6 +316,8 @@ public class CampusBuildingPanel extends JPanel {
             left2 = loadImg(basePath + "kiri 2.png");
             right1 = loadImg(basePath + "kanan 1.png");
             right2 = loadImg(basePath + "kanan 2.png");
+            npcImage = loadImg("/escapefromcampus/assets/asset dalam ruangan/npc.png");
+            aksesImage = loadImg("/escapefromcampus/assets/asset dalam ruangan/2.png");
         } catch (Exception e) {
             System.out.println("Gagal memuat sprite: " + e.getMessage());
         }
@@ -958,6 +962,7 @@ public class CampusBuildingPanel extends JPanel {
     }
 
     private void drawInteractionZones(Graphics2D g) {
+        
         for (RoomSpot spot : spots) {
             Rectangle b = spot.bounds;
             boolean active = spot == nearbySpot;
@@ -979,10 +984,26 @@ public class CampusBuildingPanel extends JPanel {
             g.drawRoundRect(b.x, b.y, b.width, b.height, 12, 12);
 
             if (isSpotAkses) {
-                String label = solvedPuzzle ? "OK" : spot.name;
-                drawCenteredText(g, label, b.x, b.y + 8, b.width,
-                        solvedPuzzle ? new Color(20, 80, 35) : new Color(25, 62, 82), Font.BOLD, 13);
+            String label = solvedPuzzle ? "OK" : spot.name;
+            drawCenteredText(g, label, b.x, b.y + 8, b.width,
+                    solvedPuzzle ? new Color(20, 80, 35) : new Color(25, 62, 82), Font.BOLD, 13);
+            
+            // TAMBAHKAN KODE GAMBAR DI SINI (di dalam blok if(isSpotAkses)):
+            // Cari bagian ini di dalam method drawInteractionZones
+            if (aksesImage != null) {
+                int imgWidth = 30; // Ukuran gambar yang sedang digunakan
+                int imgHeight = 30;
+
+                // xPos tetap untuk horizontal tengah
+                int xPos = b.x + (b.width - imgWidth) / 2;
+
+                // UBAH yPos DI SINI agar tepat di tengah kotak:
+                // b.y + (b.height - imgHeight) / 2 akan menempatkan gambar tepat di pusat vertikal kotak
+                int yPos = b.y + (b.height - imgHeight) / 2 + 15; 
+
+                g.drawImage(aksesImage, xPos, yPos, imgWidth, imgHeight, null);
             }
+        }
         }
     }
 
@@ -1071,6 +1092,9 @@ public class CampusBuildingPanel extends JPanel {
     private void drawEnemies(Graphics2D g) {
         for (PatrolEnemy enemy : enemies) {
             Rectangle b = enemy.bounds;
+            if (npcImage != null){
+                g.drawImage(npcImage, b.x, b.y, b.width, b.height, null);
+            }else{
             g.setColor(new Color(0, 0, 0, 75));
             g.fillOval(b.x + 2, b.y + 26, b.width, 12);
             g.setColor(new Color(173, 48, 54));
@@ -1082,6 +1106,7 @@ public class CampusBuildingPanel extends JPanel {
             g.setColor(new Color(255, 229, 102));
             g.fillRect(b.x + 9, b.y + 18, 16, 5);
         }
+    }
     }
 
     private void drawHud(Graphics2D g) {

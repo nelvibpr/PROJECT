@@ -52,6 +52,8 @@ public class Level1Panel extends JPanel {
     private String direction = "down"; 
     private int spriteCounter = 0;     
     private int spriteNum = 1;
+    
+    private Image imgPerpus, imgLab, imgKantin, imgRektorat, imgKelas;
 
     public Level1Panel(MainFrame frame) {
         this.frame = frame;
@@ -59,6 +61,12 @@ public class Level1Panel extends JPanel {
         this.obstacles = new ArrayList<>();
         this.places = new ArrayList<>();
         this.collectibles = new ArrayList<>();
+        
+        imgKelas = loadImg("/escapefromcampus/assets/gedung/gedung kelas.png");
+        imgKantin = loadImg("/escapefromcampus/assets/gedung/kantin.png");
+        imgLab = loadImg("/escapefromcampus/assets/gedung/lab komputer.png");
+        imgPerpus = loadImg("/escapefromcampus/assets/gedung/perpustakaan.png");
+        imgRektorat = loadImg("/escapefromcampus/assets/gedung/rektorat.png");
 
         setBackground(new Color(105, 157, 95));
         setFocusable(true);
@@ -149,7 +157,7 @@ public class Level1Panel extends JPanel {
 
         places.add(new WorldArea("Gerbang Utama", 780, 1130, 200, 160, new Color(80, 80, 80)));
         places.add(new WorldArea("Papan Info", 220, 1120, 135, 75, new Color(226, 204, 122)));
-        places.add(new WorldArea("Gedung Rektorat", 250, 420, 120, 50, new Color(196, 130, 100)));
+        places.add(new WorldArea("Gedung Rektorat", 235, 420, 150, 75, new Color(196, 130, 100))); 
         places.add(new WorldArea("Perpustakaan", 350, 750, 195, 80, new Color(153, 159, 204)));
         places.add(new WorldArea("Lab Komputer", 1340, 410, 170, 75, new Color(126, 176, 196)));
         places.add(new WorldArea("Kantin", 1000, 800, 160, 75, new Color(129, 184, 125)));
@@ -511,37 +519,55 @@ public class Level1Panel extends JPanel {
     }
 
     private void drawPlaces(Graphics2D g) {
-        g.translate(-cameraX, -cameraY);
-        for (WorldArea obstacle : obstacles) {
-            if ("Billboard Developer".equals(obstacle.name)) {
-                drawBillboard(g, obstacle);
-            } else {
-                drawBuilding(g, obstacle);
-            }
-        }
-        for (WorldArea place : places) {
-            drawInteractionZone(g, place);
-        }
-        g.translate(cameraX, cameraY);
+    g.translate(-cameraX, -cameraY);
+    
+    // Panggil metode drawBuilding untuk setiap obstacle
+    for (WorldArea obstacle : obstacles) {
+        drawBuilding(g, obstacle); // <--- INI KUNCI NYA
     }
+    
+    // Tetap gambar zona interaksi (kotak kuning di bawah pintu gedung)
+    for (WorldArea place : places) {
+        drawInteractionZone(g, place);
+    }
+    g.translate(cameraX, cameraY);
+}
 
     private void drawBuilding(Graphics2D g, WorldArea area) {
         Rectangle b = area.bounds;
-        g.setColor(new Color(0, 0, 0, 45));
-        g.fillRoundRect(b.x + 10, b.y + 12, b.width, b.height, 10, 10);
-        g.setColor(area.color);
-        g.fillRoundRect(b.x, b.y, b.width, b.height, 8, 8);
-        g.setColor(new Color(45, 45, 45));
-        g.setStroke(new BasicStroke(3));
-        g.drawRoundRect(b.x, b.y, b.width, b.height, 8, 8);
-        g.setColor(new Color(230, 232, 215));
-        for (int wx = b.x + 34; wx < b.x + b.width - 25; wx += 58) {
-            g.fillRect(wx, b.y + 38, 30, 28);
-            g.fillRect(wx, b.y + 92, 30, 28);
+        Image imgToDraw = null;
+        
+        // 1. Tentukan gambar berdasarkan nama
+        switch (area.name) {
+            case "Gedung Rektorat": imgToDraw = imgRektorat; break;
+            case "Lab Komputer":    imgToDraw = imgLab; break;
+            case "Perpustakaan":    imgToDraw = imgPerpus; break;
+            case "Kantin":          imgToDraw = imgKantin; break;
+            case "Gedung Kelas":    imgToDraw = imgKelas; break;
         }
-        g.setColor(new Color(54, 43, 37));
-        g.fillRect(b.x + b.width / 2 - 24, b.y + b.height - 54, 48, 54);
-        drawCenteredText(g, area.name, b.x, b.y + 12, b.width, new Color(255, 255, 255), Font.BOLD, 16);
+        
+        // 2. Logika penggambaran
+        if (imgToDraw != null) {
+            // Jika gambar ditemukan, gambar gambarnya saja
+            g.drawImage(imgToDraw, b.x, b.y, b.width, b.height, null);
+        } else {
+            // Jika gambar TIDAK ditemukan, baru gunakan kode geometri yang Anda sebutkan tadi
+            g.setColor(area.color);
+            g.fillRoundRect(b.x, b.y, b.width, b.height, 8, 8);
+            g.setColor(new Color(45, 45, 45));
+            g.setStroke(new BasicStroke(3));
+            g.drawRoundRect(b.x, b.y, b.width, b.height, 8, 8);
+            g.setColor(new Color(230, 232, 215));
+            for (int wx = b.x + 34; wx < b.x + b.width - 25; wx += 58) {
+                g.fillRect(wx, b.y + 38, 30, 28);
+                g.fillRect(wx, b.y + 92, 30, 28);
+            }
+            g.setColor(new Color(54, 43, 37));
+            g.fillRect(b.x + b.width / 2 - 24, b.y + b.height - 54, 48, 54);
+        }
+        
+        // 3. Gambar teks nama gedung (sekarang di posisi bawah gedung)
+        drawCenteredText(g, area.name, b.x, b.y + b.height + 10, b.width, Color.BLACK, Font.BOLD, 16);
     }
 
     private void drawBillboard(Graphics2D g, WorldArea area) {
