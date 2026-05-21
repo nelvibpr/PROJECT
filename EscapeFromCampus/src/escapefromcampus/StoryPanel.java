@@ -6,6 +6,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
+import java.net.URL;
 
 public class StoryPanel extends JPanel {
     private final JTextArea textArea;
@@ -13,8 +14,21 @@ public class StoryPanel extends JPanel {
     private Timer typewriterTimer;
     private String fullStoryText;
     private int charIndex;
-
+    
+    private Image bgImage; 
+    
     public StoryPanel(MainFrame frame) {
+    try {
+        // Sesuaikan path "/escapefromcampus/assets/..." dengan lokasi file gambar Anda
+        URL bgPath = getClass().getResource("/escapefromcampus/assets/scene/scene_bg.png");
+        if (bgPath != null) {
+            bgImage = new ImageIcon(bgPath).getImage();
+        }
+    } catch (Exception e) {
+        System.out.println("Gagal memuat background story: " + e.getMessage());
+    }
+    
+    setLayout(new GridBagLayout());
         setLayout(new GridBagLayout());
         
         // 1. Text Area untuk Cerita
@@ -123,28 +137,15 @@ public class StoryPanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
 
-        // Lantai
-        g2.setColor(new Color(60, 50, 40)); 
-        g2.fillRect(0, 0, w, h);
-
-        // Papan Tulis (Background)
-        g2.setColor(new Color(20, 50, 30));
-        g2.fillRoundRect(w/2 - 300, 50, 600, 200, 10, 10);
-        g2.setColor(new Color(100, 80, 50));
-        g2.setStroke(new BasicStroke(10));
-        g2.drawRoundRect(w/2 - 300, 50, 600, 200, 10, 10);
-
-        // Dekorasi Kapur/Tulisan OOP
-        g2.setColor(new Color(255, 255, 255, 50));
-        g2.setFont(new Font("Monospaced", Font.BOLD, 40));
-        g2.drawString("SYSTEM_LOCKED = TRUE", w/2 - 220, 140);
-        g2.setFont(new Font("Monospaced", Font.PLAIN, 20));
-        g2.drawString("while(!hasLogikaOOP) { stayInside(); }", w/2 - 230, 180);
-
-        // Meja-meja (Siluet/Bayangan)
-        g2.setColor(new Color(40, 30, 20));
-        for (int i = 0; i < 4; i++) {
-            g2.fillRect(50 + (i * 220), h - 150, 150, 80);
+        // 1. Gambar background kustom Anda
+        if (bgImage != null) {
+            g2.drawImage(bgImage, 0, 0, w, h, this);
+        } else {
+            // Fallback jika gambar tidak ditemukan
+            g2.setColor(Color.BLACK);
+            g2.fillRect(0, 0, w, h);
         }
+
+        
     }
 }
