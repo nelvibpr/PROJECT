@@ -10,37 +10,59 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.awt.*;
+import javax.swing.*;
+import java.net.URL;
 
 public class VictoryPanel extends JPanel {
+    private Image bgImage;
+    
     public VictoryPanel(MainFrame frame) {
+        // Memuat gambar background
+        try {
+            URL bgPath = getClass().getResource("/escapefromcampus/assets/victory/victory_bg.png");
+            if (bgPath != null) {
+                bgImage = new ImageIcon(bgPath).getImage();
+            }
+        } catch (Exception e) {
+            System.out.println("Gagal memuat background Victory: " + e.getMessage());
+        }
+   
+        // Menggunakan GridBagLayout untuk kontrol posisi yang presisi
         setLayout(new GridBagLayout());
-        setBackground(new Color(25, 110, 50)); // Warna hijau tema kemenangan
+        setBackground(new Color(25, 110, 50)); 
 
-        JPanel contentBox = new JPanel();
-        contentBox.setLayout(new BoxLayout(contentBox, BoxLayout.Y_AXIS));
-        contentBox.setOpaque(false);
+        GridBagConstraints gbc = new GridBagConstraints();
+        
+        // Pengaturan agar tombol berada di bagian bawah
+        gbc.gridx = 0;
+        gbc.gridy = 1; // Baris kedua
+        gbc.weighty = 1.0; // Mengambil sisa ruang vertikal
+        gbc.anchor = GridBagConstraints.SOUTH; // Mendorong ke sisi bawah (SOUTH)
+        gbc.insets = new Insets(0, 0, 100, 0); // Jarak 100 piksel dari bawah layar
 
-        JLabel titleLabel = new JLabel("BERHASIL KABUR!");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 54));
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel subLabel = new JLabel("Selamat! Kamu berhasil kabur dari Kampus, tapi tetap dapat Ilmu!");
-        subLabel.setFont(new Font("Arial", Font.PLAIN, 16));
-        subLabel.setForeground(Color.WHITE);
-        subLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
+        // Tombol Kembali ke Menu Utama
         JButton menuButton = new JButton("Kembali ke Menu Utama");
         menuButton.setFont(new Font("Arial", Font.BOLD, 18));
-        menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        // Styling tombol
+        menuButton.setBackground(new Color(0, 102, 204)); 
+        menuButton.setForeground(Color.WHITE);
+        menuButton.setFocusPainted(false); 
+        menuButton.setPreferredSize(new Dimension(250, 50)); // Ukuran tombol agar rapi
+        
         menuButton.addActionListener(e -> frame.showPanel("Menu"));
 
-        contentBox.add(titleLabel);
-        contentBox.add(Box.createRigidArea(new Dimension(0, 15)));
-        contentBox.add(subLabel);
-        contentBox.add(Box.createRigidArea(new Dimension(0, 45)));
-        contentBox.add(menuButton);
+        add(menuButton, gbc);
+    }
 
-        add(contentBox);
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (bgImage != null) {
+            g.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+        } else {
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
     }
 }
