@@ -42,9 +42,9 @@ public class MainFrame extends JFrame {
         mainPanel.add(dormitoryPanel, "Dormitory");
         mainPanel.add(new CharacterSelectPanel(this), "CharacterSelect");
         
-        // --- BARIS INI YANG SEBELUMNYA KURANG ---
         mainPanel.add(new StoryPanel(this), "Story");
-        // ----------------------------------------
+        
+        mainPanel.add(new VictoryPanel(this), "Victory");
 
         add(mainPanel);
     }
@@ -60,7 +60,7 @@ public class MainFrame extends JFrame {
         dormitoryPanel.restartRoom();
         
         // Ubah startNewGame agar langsung ke panel Classroom setelah Story selesai
-        showPanel("Classroom"); 
+        showPanel("Level1"); 
     }
 
     public void showPanel(String panelName) {

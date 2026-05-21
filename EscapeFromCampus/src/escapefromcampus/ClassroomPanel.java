@@ -324,7 +324,7 @@ public class ClassroomPanel extends JPanel {
         }
 
         if (!GameManager.catatanKelasDitemukan) {
-            missionText = "Laci terkunci. Baca petunjuk di papan tulis atau tas misterius dulu.";
+            missionText = "Fun Fact:\n" + "Jurusan Pendidikan Teknologi Infrmasi UNESA berfokus pada inovasi pembelajaran berbasis digital.";
             return;
         }
 
@@ -353,7 +353,7 @@ public class ClassroomPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Kunci Kelas didapat dari Laci Meja Dosen!");
         } else if (answer >= 0) {
             GameManager.nyawa--;
-            missionText = "Puzzle salah. Laci tetap terkunci. Nyawa tersisa: " + GameManager.nyawa + ".";
+            missionText = "Fun Fact: \n" + "UNESA merupakan salah satu universitas pencetak tenaga pendidik terbanyak di Jawa Timur." + GameManager.nyawa + ".";
 
             if (GameManager.nyawa <= 0) {
                 JOptionPane.showMessageDialog(this, "Nyawa habis. GAME OVER.");

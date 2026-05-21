@@ -19,7 +19,7 @@ public class StoryPanel extends JPanel {
         
         // 1. Text Area untuk Cerita
         textArea = new JTextArea();
-        textArea.setFont(new Font("Arial", Font.ITALIC, 22));
+        textArea.setFont(new Font("Arial", Font.ITALIC, 16));
         textArea.setForeground(Color.WHITE);
         textArea.setOpaque(false);
         textArea.setEditable(false);
@@ -30,7 +30,7 @@ public class StoryPanel extends JPanel {
         textArea.setFocusable(false); // Agar klik tembus ke panel utama
 
         // 2. Tombol Mulai (Awalnya disembunyikan)
-        startBtn = new JButton("MULAI PETUALANGAN");
+        startBtn = new JButton("MULAI MENCARI");
         startBtn.setFont(new Font("Arial", Font.BOLD, 18));
         startBtn.setBackground(new Color(50, 150, 50));
         startBtn.setForeground(Color.WHITE);
@@ -64,7 +64,7 @@ public class StoryPanel extends JPanel {
         add(dialogBox);
 
         // 4. Timer untuk Animasi Ketik (Typewriter effect)
-        typewriterTimer = new Timer(35, e -> { // Angka 35 adalah kecepatan (ms). Semakin kecil = semakin cepat.
+        typewriterTimer = new Timer(20, e -> { // Angka 35 adalah kecepatan (ms). Semakin kecil = semakin cepat.
             if (charIndex < fullStoryText.length()) {
                 textArea.setText(fullStoryText.substring(0, charIndex + 1));
                 charIndex++;
@@ -98,18 +98,17 @@ public class StoryPanel extends JPanel {
     private void startStoryAnimation() {
         String name = GameManager.playerName != null ? GameManager.playerName : "Mahasiswa";
         
-        fullStoryText = "Malam semakin larut di kampus UNESA.\n\n" +
-                "Kamu terbangun seorang diri di kelas, namun suasana terasa berbeda. " +
-                "Gerbang utama terkunci.\n\n" +
-                "Halo " + name + ", sepertinya sistem keamanan AI telah mengambil alih gedung. " +
-                "Hanya mahasiswa dengan logika OOP yang boleh keluar.\n\n" +
-                name + ", kamu harus menemukan 5 kunci asli untuk membuka gerbang.\n" +
-                "Hati-hati dengan kunci palsu dan penjaga yang tersebar di berbagai tempat!";
+        fullStoryText = "Kelas terakhir hari ini sangat membosankan. Matahari sore bersinar terik, dan kamu berniat untuk bolos dari kelas itu.\n\n" +
+                "Namun, setibanya di depan gerbang utama, pintu besi tiba-tiba menutup rapat dengan bunyi alarm keras. Layar digital gerbang berkedip merah:\n\n 'CRITICAL ERROR - MASTER KEY CORRUPTED'.\n\n" +
+                "Halo " + name + ", sepertinya beberapa anomali kode terlarang telah lepas dari server pusat dan merusak sistem enkripsi gerbang utama.\n\n" +
+                name + ", satu-satunya cara untuk kabur adalah dengan mengumpulkan 5 kunci cadangan yang tersebar di 5 gedung dalam kampus.\n" +
+                "Di setiap gedung, kamu harus menyelesaikan 3 pertanyaan logika untuk merekonstruksi kunci. \n\n" + 
+                "Hati-hati dengan anomali patroli yang berjaga dan jebakan kunci palsu yang rusak!";
         
         // Reset state sebelum mulai
         textArea.setText("");
         charIndex = 0;
-        startBtn.setVisible(false); // Pastikan tombol sembunyi lagi
+        startBtn.setVisible(false); 
         
         // Mulai animasi
         typewriterTimer.start();
