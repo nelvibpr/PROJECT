@@ -45,6 +45,8 @@ public class MainFrame extends JFrame {
         mainPanel.add(new StoryPanel(this), "Story");
         
         mainPanel.add(new VictoryPanel(this), "Victory");
+        
+        SoundManager.playMusic("/escapefromcampus/assets/music/bgm.wav");
 
         add(mainPanel);
     }
