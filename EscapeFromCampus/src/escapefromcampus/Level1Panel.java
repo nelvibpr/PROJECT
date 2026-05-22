@@ -48,6 +48,9 @@ public class Level1Panel extends JPanel {
     private WorldArea nearbyPlace;
 
     // --- VARIABEL ANIMASI SPRITE ---
+    private Image heartIcon;
+    private Image keyIcon;
+    private Image bgImage;
     private Image up1, up2, down1, down2, left1, left2, right1, right2;
     private String direction = "down"; 
     private int spriteCounter = 0;     
@@ -56,6 +59,15 @@ public class Level1Panel extends JPanel {
     private Image imgPerpus, imgLab, imgKantin, imgRektorat, imgKelas;
 
     public Level1Panel(MainFrame frame) {
+                try {
+            // Sesuaikan nama file image_df9803.jpg dengan nama file aset Anda
+            URL bgPath = getClass().getResource("/escapefromcampus/assets/map/map .png");
+            if (bgPath != null) {
+                bgImage = new ImageIcon(bgPath).getImage();
+            }
+        } catch (Exception e) {
+            System.out.println("Gagal memuat background map: " + e.getMessage());
+        }
         this.frame = frame;
         this.player = new Rectangle(150, 1080, PLAYER_SIZE, PLAYER_SIZE);
         this.obstacles = new ArrayList<>();
@@ -67,7 +79,9 @@ public class Level1Panel extends JPanel {
         imgLab = loadImg("/escapefromcampus/assets/gedung/lab komputer.png");
         imgPerpus = loadImg("/escapefromcampus/assets/gedung/perpustakaan.png");
         imgRektorat = loadImg("/escapefromcampus/assets/gedung/rektorat.png");
-
+        
+        heartIcon = loadImg("/escapefromcampus/assets/asset dalam ruangan/NYAWA.png");
+        keyIcon = loadImg("/escapefromcampus/assets/asset dalam ruangan/KUNCI.png");
         setBackground(new Color(105, 157, 95));
         setFocusable(true);
 
@@ -417,22 +431,31 @@ public class Level1Panel extends JPanel {
         }
     }
 
-    private void drawWorld(Graphics2D g) {
-        g.translate(-cameraX, -cameraY);
+   private void drawWorld(Graphics2D g) {
+    
+    g.translate(-cameraX, -cameraY);
+    
+    // GAMBAR ASET BACKGROUND ANDA DI SINI
+    if (bgImage != null) {
+        g.drawImage(bgImage, 0, 0, WORLD_WIDTH, WORLD_HEIGHT, null);
+    } else {
+        // Fallback jika gambar gagal dimuat
         GradientPaint grass = new GradientPaint(0, 0, new Color(121, 170, 103), WORLD_WIDTH, WORLD_HEIGHT, new Color(77, 139, 92));
         g.setPaint(grass);
         g.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-        drawPaths(g);
-        drawTrees(g);
-        drawGate(g); 
-
-        g.setColor(new Color(67, 107, 65));
-        g.setStroke(new BasicStroke(8));
-        g.drawRect(4, 4, WORLD_WIDTH - 8, WORLD_HEIGHT - 8);
-
-        g.translate(cameraX, cameraY);
     }
+
+    // Tetap panggil drawPaths dan drawTrees jika ingin elemen tersebut tetap ada di atas background
+    drawPaths(g);
+    drawTrees(g);
+    drawGate(g); 
+
+    g.setColor(new Color(67, 107, 65));
+    g.setStroke(new BasicStroke(8));
+    g.drawRect(4, 4, WORLD_WIDTH - 8, WORLD_HEIGHT - 8);
+
+    g.translate(cameraX, cameraY);
+}
     
     private void drawGate(Graphics2D g) {
         int gx = 790;
@@ -597,7 +620,11 @@ public class Level1Panel extends JPanel {
     private void drawCollectibles(Graphics2D g) {
         g.translate(-cameraX, -cameraY);
         for (Collectible collectible : collectibles) {
-            if (collectible.collected) continue;
+            if (collectible.bounds != null){
+                if (keyIcon != null){
+                  g.drawImage(keyIcon, collectible.bounds.x, collectible.bounds.y, collectible.bounds.width, collectible.bounds.height, null);
+                }
+            }
             if (collectible.fake) {
                 drawFakeKey(g, collectible.bounds);
             } else {
@@ -640,7 +667,9 @@ public class Level1Panel extends JPanel {
         g.drawString("Nyawa: ", 170, 74);
         g.setColor(new Color(220, 40, 40)); 
         for (int i = 0; i < nyawa; i++) {
-            g.fillRoundRect(225 + (i * 20), 60, 15, 15, 4, 4); 
+            if (heartIcon != null){
+                g.drawImage(heartIcon, 150 + (i * 25), 15, 30, 30, null); 
+            } 
         }
 
         int kunci = GameManager.kunci;
