@@ -666,18 +666,37 @@ public class Level1Panel extends JPanel {
         int nyawa = GameManager.nyawa;
         g.drawString("Nyawa: ", 170, 74);
         g.setColor(new Color(220, 40, 40)); 
+        int textY = 74;
+        int heartSize = 20; // Ukuran hati (sesuaikan dengan tinggi kotak merah lama)
+        int startX = 220;   // Posisi awal X (sesuaikan agar sejajar dengan teks "Nyawa:")
+        int startY = 10;    // Posisi Y (sesuaikan agar sejajar vertikal)
+        int spacing = 35;   // Jarak antar hati
         for (int i = 0; i < nyawa; i++) {
-            if (heartIcon != null){
-                g.drawImage(heartIcon, 150 + (i * 25), 15, 30, 30, null); 
-            } 
+            if (heartIcon != null) {
+        // Menggunakan textY - 15 agar hati naik sedikit sejajar dengan tengah teks
+               g.drawImage(heartIcon, startX + (i * 25), textY - 18, heartSize, heartSize, null);
+            } else {
+        // Fallback kotak merah tetap di posisi yang sama
+               g.setColor(Color.RED);
+               g.fillRect(startX + (i * 25), textY - 18, heartSize, heartSize);
+            }
         }
 
         int kunci = GameManager.kunci;
         g.setColor(Color.WHITE);
         g.drawString("Kunci: ", 310, 74);
         g.setColor(new Color(240, 200, 40)); 
+        int keySize = 25;
+        int textKunciY = 74;
+        int startKunciX = 360;
         for (int i = 0; i < kunci; i++) {
-            g.fillRoundRect(360 + (i * 20), 60, 15, 15, 4, 4); 
+            if (keyIcon != null) {
+                g.drawImage(keyIcon, startKunciX + (i * 30), textKunciY - 26, keySize, keySize, null);
+            } else {
+        // Fallback jika icon hilang
+                g.setColor(new Color(240, 200, 40));
+                g.fillRect(startKunciX + (i * 30), textKunciY - 22, 25, 25);
+            } 
         }
 
         int infoX = 580; 
