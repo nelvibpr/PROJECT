@@ -1,9 +1,8 @@
 package escapefromcampus;
 
 public class GameManager {
-    public static final int KUNCI_TARGET = 5;
+    public static final int KUNCI_TARGET = 0;
 
-    // --- Tambahkan dua baris ini ---
     public static String playerName = "";
     public static int playerGender = 0; // 0 = Laki-laki, 1 = Perempuan
     // -------------------------------

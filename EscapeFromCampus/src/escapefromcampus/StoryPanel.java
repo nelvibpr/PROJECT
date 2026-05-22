@@ -78,7 +78,7 @@ public class StoryPanel extends JPanel {
         add(dialogBox);
 
         // 4. Timer untuk Animasi Ketik (Typewriter effect)
-        typewriterTimer = new Timer(20, e -> { // Angka 35 adalah kecepatan (ms). Semakin kecil = semakin cepat.
+        typewriterTimer = new Timer(20, e -> { 
             if (charIndex < fullStoryText.length()) {
                 textArea.setText(fullStoryText.substring(0, charIndex + 1));
                 charIndex++;

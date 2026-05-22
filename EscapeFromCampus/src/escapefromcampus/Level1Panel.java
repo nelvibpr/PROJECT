@@ -59,9 +59,8 @@ public class Level1Panel extends JPanel {
     private Image imgPerpus, imgLab, imgKantin, imgRektorat, imgKelas;
 
     public Level1Panel(MainFrame frame) {
-                try {
-            // Sesuaikan nama file image_df9803.jpg dengan nama file aset Anda
-            URL bgPath = getClass().getResource("/escapefromcampus/assets/map/map .png");
+            try {
+                URL bgPath = getClass().getResource("/escapefromcampus/assets/map/map .png");
             if (bgPath != null) {
                 bgImage = new ImageIcon(bgPath).getImage();
             }

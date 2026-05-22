@@ -33,15 +33,10 @@ public class CharacterSelectPanel extends JPanel {
         // Memberi padding luar (Atas, Kiri, Bawah, Kanan)
         setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
 
-        // JUDUL TEKS "PILIH KARAKTERMU" DIHAPUS (Karena sudah ada di gambar background)
-
         // 2. AREA TENGAH
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setOpaque(false); // Transparan agar background terlihat
-
-        // --- PERBAIKAN 1: MENURUNKAN TEKS ---
-        // Jarak dari atas ditingkatkan dari 110 menjadi 160 agar teks nama turun
         centerPanel.add(Box.createRigidArea(new Dimension(0, 160)));
 
         JLabel nameLabel = new JLabel("Masukkan Namamu:") {
@@ -56,7 +51,6 @@ public class CharacterSelectPanel extends JPanel {
         nameLabel.setFont(new Font("Arial", Font.BOLD, 22));
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // 3. MENGUBAH TEXT INPUT MENJADI GAMBAR (INPUT NAMA.png)
         JPanel inputPanel = new JPanel() {
             Image inputBg;
             {
@@ -92,13 +86,10 @@ public class CharacterSelectPanel extends JPanel {
         JPanel charPanel = new JPanel(new GridLayout(1, 2, 40, 0));
         charPanel.setOpaque(false);
         
-        // --- PERBAIKAN 2: UBAH UKURAN KARTU MENJADI 230x250 ---
-        // Total lebar untuk 2 kartu (230*2) + gap (40) = 500. Tinggi total = 250.
-        // Sebelumnya: Dimension(500, 220).
         charPanel.setMaximumSize(new Dimension(500, 250));
         charPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 30, 0));
 
-        // Teks "Laki-laki" dan "Perempuan" sudah dihapus
+       
         maleBtn = createCharButton("/escapefromcampus/assets/AWAL/boy.png", COLOR_MALE);
         maleBtn.addActionListener(e -> selectGender(0));
 

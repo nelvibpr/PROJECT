@@ -12,7 +12,15 @@ public class SoundManager {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(url);
             clip = AudioSystem.getClip();
             clip.open(audioStream);
-            clip.loop(Clip.LOOP_CONTINUOUSLY); // Musik akan berulang terus
+
+            // --- TAMBAHKAN KODE INI UNTUK MENGECILKAN VOLUME ---
+            if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(-30.0f); 
+            }
+            // ---------------------------------------------------
+
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
             clip.start();
         } catch (Exception e) {
             System.out.println("Gagal memuat musik: " + e.getMessage());
